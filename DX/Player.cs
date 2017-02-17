@@ -56,7 +56,7 @@ namespace DX
         internal void CheckQuests()
         {
             foreach (Quest quest in quests) {
-                quest.QuestCheck(this);
+                if(quest.State!=0 && !quest.Finished) quest.QuestCheck(this);
             }
         }
 

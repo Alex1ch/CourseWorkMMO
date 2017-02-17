@@ -14,7 +14,7 @@ namespace DX
 
     public class Item : ICloneable
     {
-        List<Item> drop;
+        static List<Item> drop;
 
         float x=0, y=0;
         bool dropped=false;
@@ -56,11 +56,6 @@ namespace DX
         {
             if (quantity >= MaxQuantity) return true;
             return false;
-        }
-
-        public Item(List<Item> droplist) {
-
-            drop = droplist;
         }
 
         public int Quantity
@@ -154,7 +149,7 @@ namespace DX
             }
         }
 
-        public List<Item> Drop
+        static public List<Item> Drop
         {
             get
             {
@@ -237,11 +232,50 @@ namespace DX
     {
         PotionType potionType;
 
-        public Potion(PotionType _potionType, int quantity, float x, float y, bool drop, List<Item> droplist) :base(droplist)
+        public Potion(PotionType _potionType, int quantity, float x, float y)
         {
-            base.Dropped = drop;
+            base.Dropped = true;
             base.X = x;
             base.Y = y;
+            potionType = _potionType;
+            base.MaxQuantity = 20;
+            base.Quantity = quantity;
+            if (potionType == PotionType.Health)
+            {
+                base.Name = "Health Potion";
+                base.Desc = "Restore 20HP";
+                base.NameR = .1f;
+                base.NameG = 1f;
+                base.NameB = .1f;
+                base.Texture = "ItemHP0";
+                Id = 0;
+            }
+            if (potionType == PotionType.Speed)
+            {
+                base.Name = "Speed Potion";
+                base.Desc = "Restore 20HP";
+                base.NameR = .1f;
+                base.NameG = 1f;
+                base.NameB = .1f;
+                base.Texture = "ItemSpeed0";
+                Id = 1;
+            }
+            if (potionType == PotionType.Energy)
+            {
+                base.Name = "Energy Potion";
+                base.Desc = "Restore 20HP";
+                base.NameR = .1f;
+                base.NameG = 1f;
+                base.NameB = .1f;
+                base.Texture = "ItemEnergy0";
+                Id = 2;
+            }
+        }
+
+
+        public Potion(PotionType _potionType, int quantity)
+        {
+            base.Dropped = false;
             potionType = _potionType;
             base.MaxQuantity = 20;
             base.Quantity = quantity;

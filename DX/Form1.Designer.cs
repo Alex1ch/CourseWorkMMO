@@ -35,6 +35,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.ControlTimer = new System.Windows.Forms.Timer(this.components);
             this.LogicTimer = new System.Windows.Forms.Timer(this.components);
+            this.QuestCheckTimer = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // RenderTimer
@@ -91,6 +92,10 @@
             this.LogicTimer.Interval = 5;
             this.LogicTimer.Tick += new System.EventHandler(this.LogicTimer_Tick);
             // 
+            // QuestCheckTimer
+            // 
+            this.QuestCheckTimer.Tick += new System.EventHandler(this.QuestCheckTimer_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -116,6 +121,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Timer ControlTimer;
         private System.Windows.Forms.Timer LogicTimer;
+        private System.Windows.Forms.Timer QuestCheckTimer;
     }
 }
 

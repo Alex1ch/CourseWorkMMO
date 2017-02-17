@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DX
@@ -12,6 +13,11 @@ namespace DX
         bool finished = false;
         int finishState;
         string name;
+
+        bool popUp = false;
+
+        List<Item> reward=new List<Item>();
+
         string[] desc;
 
         public virtual void QuestCheck(Player player)
@@ -19,26 +25,38 @@ namespace DX
         }
 
 
-        public virtual bool FinishCheck()
+        public virtual bool FinishCheck(Player player)
         {
             if (finishState == state) {
-                return true;
+                foreach (Item item in Reward) {
+                    player.Inventory.Add(item);
+                }
                 finished = true;
+                return true;
             }
             return false;
         }
 
+        public void StateUp() {
+            state++; PopUpFunc();
+        }
+
+        protected void PopUpFunc() {
+            if (PopUp) return;
+            Task.Factory.StartNew(() =>
+            {
+                PopUp = true;
+                Thread.Sleep(4000);
+                PopUp = false;
+                
+            });
+        }
 
         public int State
         {
             get
             {
                 return state;
-            }
-
-            set
-            {
-                state = value;
             }
         }
 
@@ -93,7 +111,33 @@ namespace DX
                 name = value;
             }
         }
-    }
+
+        public bool PopUp
+        {
+            get
+            {
+                return popUp;
+            }
+
+            set
+            {
+                popUp = value;
+            }
+        }
+
+        public List<Item> Reward
+        {
+            get
+            {
+                return reward;
+            }
+
+            set
+            {
+                reward = value;
+            }
+        }
+    }  
 
     class DarkSignsQuest : Quest {
         int counter = 0;
@@ -101,12 +145,13 @@ namespace DX
         int killlimit = 7;
 
         public DarkSignsQuest() {
-            base.State = 0;
-            base.FinishState = 2;
+            base.Reward.Add(new Potion(PotionType.Energy, 2));
+            base.FinishState = 3;
             base.Name = "Dark Signs";
             base.Desc = new string[base.FinishState];
-
-            Desc[1] = "Civilians saved, Ghosts were killed";
+            Desc[0] = "You find some strange spoil\non the floor and then you saw\nthe Scary Ghost tourchering\npeople, you should kill them (0/" + killlimit.ToString()+")" ;
+            Desc[1] = "Civilians saved, Ghosts were killed,\n return to Andre for your reward";
+            Desc[2] = "Quest Complete!";
         }
 
         public override void QuestCheck(Player player)
@@ -116,19 +161,23 @@ namespace DX
                     {
                         if (player.X > 30 && player.X < 43 && player.Y > 30 && player.Y < 43) {
                             startkills = player.KilledEnemies[0];
-                            State++;
+                            StateUp();
                         }
                         break;
                     }
                 case 1: {
-                        counter = player.KilledEnemies[1] - startkills;
-                        Desc[0] = "You find some strange spoil\non the floor and then you saw\nthe Scary Ghost tourchering\npeople, you should kill them (" + counter.ToString()+"/"+killlimit.ToString()+")" ;
-                        if (counter == killlimit) State++;
+                        if (counter != player.KilledEnemies[1] - startkills)
+                        {
+                            counter = player.KilledEnemies[1] - startkills;
+                            Desc[0] = "You find some strange spoil\non the floor and then you saw\nthe Scary Ghost tourchering\npeople, you should kill them (" + counter.ToString() + "/" + killlimit.ToString() + ")";
+                            if (counter >= killlimit) StateUp();
+                                else PopUpFunc();
+                        }
                         break;
                     }
-                case 2:
+                case 3:
                     {
-                        base.FinishCheck();
+                        FinishCheck(player);
                         break;
                     }
                 default: break;

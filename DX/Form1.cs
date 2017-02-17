@@ -23,16 +23,18 @@ namespace DX
         Dictionary<int, Enemy> EnemyList;
         List<Item> DropList;
         List<Player> AllPlayers;
+        List<NPC> NPCList;
 
         int[,] map;
         int[,] obj_map;
 
         //float x, y;
-        
+        float ScaleH, ScaleW;
 
         float ScrH, ScrW;
         int MouseX, MouseY;
         float MouseOnMatrixX, MouseOnMatrixY;
+        float MouseOnMapX, MouseOnMapY;
 
         bool QuestMenu = false;
         bool InvMenu = false;
@@ -166,7 +168,6 @@ namespace DX
 
 
 
-            //отрисовка противников
             Gl.glPushMatrix();
             Gl.glTranslatef(-player.X + ScrW / 2, -player.Y + ScrH / 2, 0);
 
@@ -174,6 +175,16 @@ namespace DX
             //
             //
 
+            //отрисовка дропа
+            foreach (Item item in GetNearbyItems(player.X, player.Y, DropList))
+            {
+                Gl.glColor3f(1, 1, 1);
+                if (item.Y - .1f < player.Y) Draw2DTextCent(item.X, item.Y, -2, .4f, .4f, Textures[item.Texture]);
+                else Draw2DTextCent(item.X, item.Y, -.5f, .4f, .4f, Textures[item.Texture]);
+            }
+
+
+            //отрисовка противников
 
             foreach (KeyValuePair<int, Enemy> enemy in GetNearbyEnemies(player.X, player.Y, EnemyList))
             {
@@ -191,14 +202,23 @@ namespace DX
                 }
             }
 
-            //отрисовка дропа
 
-            foreach (Item item in GetNearbyItems(player.X, player.Y, DropList))
-            {
-                Gl.glColor3f(1, 1, 1);
-                if (item.Y - .1f < player.Y) Draw2DTextCent(item.X, item.Y,-2,.4f,.4f,Textures[item.Texture]);
-                else Draw2DTextCent(item.X, item.Y, -.5f, .4f, .4f, Textures[item.Texture]);
+            //Отрисовка NPC
+
+
+            foreach (NPC npc in NPCList) {
+                if (npc.Y - .1f < player.Y)
+                {
+                    Draw2DText(npc.X - .75f, npc.Y, -2, 1.5f, 1.5f, Textures[npc.CalcAnim(npc)]);
+                    if (npc.ExMark(player)) Draw2DText(npc.X - .35f, npc.Y+1.65f, -2, .7f, .7f, Textures["ExMark"]);
+                }
+                else
+                {
+                    if (npc.ExMark(player)) Draw2DText(npc.X - .35f, npc.Y + 1.65f, -.7f, .7f,.7f, Textures["ExMark"]);
+                    Draw2DText(npc.X - .75f, npc.Y, -.5f, 1.5f, 1.5f, Textures[npc.CalcAnim(npc)]);
+                }
             }
+
 
             Gl.glTranslatef(player.X - ScrW / 2, player.Y - ScrH / 2, 0);
             Gl.glPopMatrix();
@@ -236,11 +256,11 @@ namespace DX
                 if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height && player.Inventory.Items[Y*player.Inventory.Width+X]!=null)
                 {
                     
-                    float Width = Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_18, player.Inventory.Items[Y * player.Inventory.Width + X].Name) * ScrW / AnT.Width
-                        >= Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_12, player.Inventory.Items[Y * player.Inventory.Width + X].Desc) * ScrW / AnT.Width?
-                        Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_18, player.Inventory.Items[Y * player.Inventory.Width + X].Name) * ScrW / AnT.Width:
-                        Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_12, player.Inventory.Items[Y * player.Inventory.Width + X].Desc) * ScrW / AnT.Width;
-                    float Height = Glut.glutBitmapHeight(Glut.GLUT_BITMAP_HELVETICA_12) * ScrH / AnT.Height;
+                    float Width = Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_18, player.Inventory.Items[Y * player.Inventory.Width + X].Name) * ScaleW
+                        >= Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_12, player.Inventory.Items[Y * player.Inventory.Width + X].Desc) * ScaleW ?
+                        Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_18, player.Inventory.Items[Y * player.Inventory.Width + X].Name) * ScaleW:
+                        Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_12, player.Inventory.Items[Y * player.Inventory.Width + X].Desc) * ScaleW;
+                    float Height = Glut.glutBitmapHeight(Glut.GLUT_BITMAP_HELVETICA_12) * ScaleH;
                     int lines = 1;
                     for (int i = 0; i < player.Inventory.Items[Y * player.Inventory.Width + X].Desc.Length; i++) {
                         if (player.Inventory.Items[Y * player.Inventory.Width + X].Desc[i] == '\n') lines++;
@@ -270,14 +290,43 @@ namespace DX
 
             if (QuestMenu)
             {
+                float TextCursor=0;
+                float Height;
                 Gl.glColor3f(1, .8f, 0);
                 Draw2DText(11,2,-3,4,7,Textures["Menu"]);
                 Gl.glLoadIdentity();
                 DrawStringCent(11, 15, 8.25f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, "Quests", 1f, 1f, 1f, true);
-                if (player.Quests[0].State != 0)
+                foreach (Quest quest in player.Quests) {
+                    if (quest.State != 0&&quest.Finished==false)
+                    {
+                        int lines = 1;
+                        if(quest.Desc[quest.State - 1]!=null)for (int i = 0; i < quest.Desc[quest.State - 1].Length; i++)
+                            if (quest.Desc[quest.State - 1][i] == '\n') lines++;
+                        Height = Glut.glutBitmapHeight(Glut.GLUT_BITMAP_HELVETICA_18) * ScaleH;
+                        DrawStringCent(11, 15, 7.57f-TextCursor, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, quest.Name, 1f, 1f, .5f, true);
+                        TextCursor += Height;
+                        Height=lines*Glut.glutBitmapHeight(Glut.GLUT_BITMAP_HELVETICA_12) * ScaleH;
+                        DrawStringCent(11, 15, 7.57f-TextCursor, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, quest.Desc[quest.State - 1], 1f, 1f, .5f, true);
+                        TextCursor += Height+Glut.glutBitmapHeight(Glut.GLUT_BITMAP_HELVETICA_18) * ScaleH;
+
+                    }
+                }
+            }
+
+            //Уведомления изменения квестов
+            foreach (Quest quest in player.Quests) {
+                if (quest.PopUp)
                 {
-                    DrawStringCent(11, 15, 7.25f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, player.Quests[0].Name, 1f, 1f, .5f, true);
-                    DrawStringCent(11, 15, 6.75f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, player.Quests[0].Desc[player.Quests[0].State - 1], 1f, 1f, .5f, true);
+                    if (InvMenu) {
+
+                        DrawString(6, 9, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, quest.Name, 1f, 1f, .3f, true);
+                        DrawString(6, 8.5f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, quest.Desc[quest.State - 1], 1f, 1f, .3f, true);
+                    }
+                    else { 
+                        DrawString(1, 9, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, quest.Name, 1f, 1f, .3f, true);
+                        DrawString(1, 8.5f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, quest.Desc[quest.State - 1], 1f, 1f, .3f, true);
+                    }
+                    break;
                 }
             }
 
@@ -298,8 +347,6 @@ namespace DX
 
         private void LogicTimer_Tick(object sender, EventArgs e)
         {
-            AllPlayers = new List<Player>();
-            AllPlayers.Add(player);
             player.CheckDeath();
             player.CalcAnim();
             player.CalcRotation(MouseX, MouseY, AnT.Width / 2, AnT.Height / 2);
@@ -314,8 +361,14 @@ namespace DX
                     EnemyList.Remove(enemy.Key);
                 }
             }
+        }
 
-            foreach (Player player in AllPlayers) {
+
+
+        private void QuestCheckTimer_Tick(object sender, EventArgs e)
+        {
+            foreach (Player player in AllPlayers)
+            {
                 player.CheckQuests();
             }
         }
@@ -385,7 +438,11 @@ namespace DX
 
             ScrW = 16;
             ScrH = 10;
-            
+
+            ScaleH = ScrH / AnT.Height;
+            ScaleW = ScrW / AnT.Width;
+
+
             Glut.glutInit();
             // инициализация режима экрана 
             Glut.glutInitDisplayMode(Glut.GLUT_RGB | Glut.GLUT_DOUBLE);
@@ -400,9 +457,9 @@ namespace DX
             Gl.glMatrixMode(Gl.GL_PROJECTION);
             // очистка матрицы 
             Gl.glLoadIdentity();
-            
+
             Gl.glOrtho(0.0, ScrW, 0.0, ScrH, 10, -10);
-            
+
             Gl.glMatrixMode(Gl.GL_MODELVIEW);
             Gl.glLoadIdentity();
 
@@ -414,13 +471,16 @@ namespace DX
             Gl.glDepthFunc(Gl.GL_LEQUAL);
             Gl.glClearDepth(1.0);
             Gl.glBlendFunc(Gl.GL_SRC_ALPHA, Gl.GL_ONE_MINUS_SRC_ALPHA);
-            
-            player = new Player(34,65);
-            
+
+            player = new Player(34, 65);
+
+            AllPlayers = new List<Player>();
+            AllPlayers.Add(player);
+
             EnemyList = new Dictionary<int, Enemy>();
 
-            EnemyList.Add(0, new Ghost(38,32,RNG));
-            EnemyList.Add(1, new Ghost(36,36,RNG));
+            EnemyList.Add(0, new Ghost(38, 32, RNG));
+            EnemyList.Add(1, new Ghost(36, 36, RNG));
             EnemyList.Add(2, new Ghost(38, 35, RNG));
             EnemyList.Add(3, new Ghost(36, 31, RNG));
             EnemyList.Add(4, new Ghost(38, 32, RNG));
@@ -438,17 +498,17 @@ namespace DX
 
             obj_map = ObjMapReader.MapArray();
 
+            //Инициализация NPC
 
+            NPCList = new List<NPC>();
 
-            player.Inventory.Add(new Potion(PotionType.Health, 2, 0, 0, false, DropList));
-            player.Inventory.Add(new Potion(PotionType.Health, 4, 0, 0, false, DropList));
-            player.Inventory.Add(new Potion(PotionType.Energy, 4, 0, 0, false, DropList));
-            player.Inventory.Add(new Potion(PotionType.Speed, 4, 0, 0, false, DropList));
-            player.Inventory.Add(new Potion(PotionType.Energy, 4, 0, 0, false, DropList));
-            player.Inventory.Add(new Potion(PotionType.Health, 2, 0, 0, false, DropList));
-            player.Inventory.Add(new Potion(PotionType.Health, 200, 0, 0, false, DropList));
+            NPCDelegates _NPCDelegates = new NPCDelegates();
 
-            player.Inventory.Add(new Potion(PotionType.Health, 200, 0, 0, false, DropList));
+            NPCList.Add(new DX.NPC(32, 60, new string[]{"IdleD"},new NPCClickFuncDel(NPCDelegates.AndreClickFunc), new NPCCalcAnimDel(NPCDelegates.AndreCalcAnim), new NPCExMarkDel(NPCDelegates.AndreExMark)));
+
+            Item.Drop = DropList;
+
+            player.Inventory.Add(new Potion(PotionType.Health, 2));
 
             //objects
             //Загрузил 12 текстурок, вместо 3, ведь вращать не додумался 
@@ -482,6 +542,7 @@ namespace DX
             Textures.Add("Menu", LoadTexture("Tex//MenuScreen.png"));
             Textures.Add("ItemBG", LoadTexture("Tex//ItemBG.png"));
             Textures.Add("DescBG", LoadTexture("Tex//DescBG.png"));
+            Textures.Add("ExMark", LoadTexture("Tex//ExMark.png"));
 
             //Items
             //Potions
@@ -549,6 +610,7 @@ namespace DX
             // активация таймера, вызывающего функцию для визуализации 
             RenderTimer.Start();
             LogicTimer.Start();
+            QuestCheckTimer.Start();
         }
 
         private void ControlTimer_Tick(object sender, EventArgs e)
@@ -560,13 +622,25 @@ namespace DX
             player.MovedByControl(W, A, S, D, map);
         }
 
+
+
         private void AnT_MouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left) player.AttackFunc(GetNearbyEnemies(player.X, player.Y, EnemyList));
+            if (e.Button == MouseButtons.Left) {
+                player.AttackFunc(GetNearbyEnemies(player.X, player.Y, EnemyList));
+            }
             if (e.Button == MouseButtons.Right) {
                 int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
                 int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
                 if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height) player.Inventory.Activate((int)Y * player.Inventory.Width + (int)X);
+                MousePosOnMap();
+                label1.Text = MouseOnMapX.ToString() + " " + MouseOnMapY.ToString();
+                foreach (NPC npc in GetNearbyNPCs(player.X, player.Y, NPCList))
+                {
+                    if (MouseOnMapX > npc.X - .5f && MouseOnMapX < npc.X + .5f && MouseOnMapY > npc.Y && MouseOnMapY < npc.Y + 1) {
+                        npc.ClickFunc(player, npc);
+                    }
+                }
             }
         }
 
@@ -613,6 +687,12 @@ namespace DX
             Y = AnT.Height-(Form1.MousePosition.Y - this.Location.Y - 32);
             MouseOnMatrixX = (float)X / (float)AnT.Width * (float)ScrW;
             MouseOnMatrixY = (float)Y / (float)AnT.Height * (float)ScrH;
+        }
+
+        void MousePosOnMap() {
+            MousePosOnAnt(out MouseX, out MouseY, out MouseOnMatrixX, out MouseOnMatrixY);
+            MouseOnMapX = player.X + MouseOnMatrixX - ScrW/2;
+            MouseOnMapY = player.Y + MouseOnMatrixY - ScrH / 2;
         }
 
 
@@ -703,6 +783,19 @@ namespace DX
         {
             List<Item> output = new List<Item>();
             foreach (Item enemy in Items)
+            {
+                if (Math.Sqrt((playerX - enemy.X) * (playerX - enemy.X) + (playerY - enemy.Y) * (playerY - enemy.Y)) < 11f)
+                {
+                    output.Add(enemy);
+                }
+            }
+            return output;
+        }
+
+        List<NPC> GetNearbyNPCs(float playerX, float playerY, List<NPC> NPCs)
+        {
+            List<NPC> output = new List<NPC>();
+            foreach (NPC enemy in NPCs)
             {
                 if (Math.Sqrt((playerX - enemy.X) * (playerX - enemy.X) + (playerY - enemy.Y) * (playerY - enemy.Y)) < 11f)
                 {
