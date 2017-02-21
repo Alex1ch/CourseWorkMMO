@@ -10,6 +10,8 @@ namespace DX
     {
         static public void AndreClickFunc(Player player, NPC ThisNPC)
         {
+            player.DialogMenu = true;
+            player.DialogMenuText = "";
             if(player.Quests[0].State==0 || player.Quests[0].State == 2) player.Quests[0].StateUp();
         }
 

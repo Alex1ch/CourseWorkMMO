@@ -38,6 +38,9 @@ namespace DX
 
         bool QuestMenu = false;
         bool InvMenu = false;
+        bool LoginScreen = true;
+
+        float CamX = 30, CamY = 30;
 
         Player player;
 
@@ -72,10 +75,10 @@ namespace DX
                     if (map[i, j] == 2) Draw2DText(i, j, 0, 1f, 1f, Textures["Sand"]);
                     if (map[i, j] == 3) Draw2DText(i, j, 0, 1f, 1f, Textures["Ground"]);
                     if (map[i, j] == 4) Draw2DText(i, j, 0, 1f, 1f, Textures["StWall"]);
-                    if (map[i, j] == 5) Draw2DText(i, j, -1.5f, 1f, 1f, Textures["StBlack"]);
+                    if (map[i, j] == 5) Draw2DText(i, j, -2.1f, 1f, 1f, Textures["StBlack"]);
                     if (map[i, j] == 6) Draw2DText(i, j, 0, 1f, 1f, Textures["StFloor"]);
                     if (map[i, j] == 7) Draw2DText(i, j, 0, 1f, 1f, Textures["WFloor"]);
-                    if (map[i, j] == 8) Draw2DText(i, j, -1.5f, 1f, 1f, Textures["StBlack"]);
+                    if (map[i, j] == 8) Draw2DText(i, j, -2.1f, 1f, 1f, Textures["StBlack"]);
 
                     //Текстуры объектов
                     if (obj_map[i, j] == 1) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadD"]);
@@ -98,21 +101,11 @@ namespace DX
 
 
             //отрисовка героя
-
-            //проверка жизни
-
-            //
-            //
+            
 
             MousePosOnAnt(out MouseX, out MouseY, out MouseOnMatrixX, out MouseOnMatrixY);
 
             Gl.glColor3f(1,1,1);
-
-            //
-            //
-            
-            //label1.Text = player.Hp.ToString();
-            label2.Text = "Px=" + player.X.ToString() + "\tPy=" + player.Y;
 
             Gl.glPushMatrix();
 
@@ -124,38 +117,38 @@ namespace DX
                 if (!player.LEFT && !player.RIGHT && !player.UP && !player.DOWN && !player.Attack)
                 {
                     player.ResetAnim();
-                    if (player.Rotation < 45 && player.Rotation >= -45) Draw2DTextCent(0, .60f, -1, 1.5f, 1.5f, Textures["IdleR"]);
-                    if (player.Rotation >= 45 && player.Rotation < 135) Draw2DTextCent(0, .60f, -1, 1.5f, 1.5f, Textures["IdleU"]);
-                    if (player.Rotation >= 135 || player.Rotation < -135) Draw2DTextCent(0, .60f, -1, 1.5f, 1.5f, Textures["IdleL"]);
-                    if (player.Rotation >= -135 && player.Rotation < -45) Draw2DTextCent(0, .60f, -1, 1.5f, 1.5f, Textures["IdleD"]);
+                    if (player.Rotation < 45 && player.Rotation >= -45) Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["IdleR"]);
+                    if (player.Rotation >= 45 && player.Rotation < 135) Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["IdleU"]);
+                    if (player.Rotation >= 135 || player.Rotation < -135) Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["IdleL"]);
+                    if (player.Rotation >= -135 && player.Rotation < -45) Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["IdleD"]);
                 }
 
 
                 if (player.Attack)
                 {
-                    if (player.Rotation < 45 && player.Rotation >= -45) Draw2DTextCent(0, .60f, -1, 1.5f, 1.5f, Textures["HeroAtkR" + player.AttackAtState.ToString()]);
-                    if (player.Rotation >= 45 && player.Rotation < 135) Draw2DTextCent(0, .60f, -1, 1.5f, 1.5f, Textures["HeroAtkU" + player.AttackAtState.ToString()]);
-                    if (player.Rotation >= 135 || player.Rotation < -135) Draw2DTextCent(0, .60f, -1, 1.5f, 1.5f, Textures["HeroAtkL" + player.AttackAtState.ToString()]);
-                    if (player.Rotation >= -135 && player.Rotation < -45) Draw2DTextCent(0, .60f, -1, 1.5f, 1.5f, Textures["HeroAtkD" + player.AttackAtState.ToString()]);
+                    if (player.Rotation < 45 && player.Rotation >= -45) Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroAtkR" + player.AttackAtState.ToString()]);
+                    if (player.Rotation >= 45 && player.Rotation < 135) Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroAtkU" + player.AttackAtState.ToString()]);
+                    if (player.Rotation >= 135 || player.Rotation < -135) Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroAtkL" + player.AttackAtState.ToString()]);
+                    if (player.Rotation >= -135 && player.Rotation < -45) Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroAtkD" + player.AttackAtState.ToString()]);
                 }
                 else
                 {
 
                     if (player.LEFT)
                     {
-                        Draw2DTextCent(0, .60f, -1, 1.5f, 1.5f, Textures["HeroLEFT" + player.RunAtState.ToString()]);
+                        Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroLEFT" + player.RunAtState.ToString()]);
                     }
                     if (player.UP)
                     {
-                        Draw2DTextCent(0, .60f, -1, 1.5f, 1.5f, Textures["HeroUP" + player.RunAtState.ToString()]);
+                        Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroUP" + player.RunAtState.ToString()]);
                     }
                     if (player.DOWN)
                     {
-                        Draw2DTextCent(0, .60f, -1, 1.5f, 1.5f, Textures["HeroDOWN" + player.RunAtState.ToString()]);
+                        Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroDOWN" + player.RunAtState.ToString()]);
                     }
                     if (player.RIGHT)
                     {
-                        Draw2DTextCent(0, .60f, -1, 1.5f, 1.5f, Textures["HeroRIGHT" + player.RunAtState.ToString()]);
+                        Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroRIGHT" + player.RunAtState.ToString()]);
                     }
                 }
 
@@ -179,8 +172,7 @@ namespace DX
             foreach (Item item in GetNearbyItems(player.X, player.Y, DropList))
             {
                 Gl.glColor3f(1, 1, 1);
-                if (item.Y - .1f < player.Y) Draw2DTextCent(item.X, item.Y, -2, .4f, .4f, Textures[item.Texture]);
-                else Draw2DTextCent(item.X, item.Y, -.5f, .4f, .4f, Textures[item.Texture]);
+                Draw2DTextCent(item.X, item.Y, OnScreenYtoZ(item.Y), .4f, .4f, Textures[item.Texture]);
             }
 
 
@@ -193,8 +185,7 @@ namespace DX
                     if (!player.Alive) Gl.glColor3f(.5f, .5f, .5f);
                     else Gl.glColor3f(1f, 1f, 1f);
                     //Gl.glClearDepth(1);
-                    if (enemy.Value.Y - .1f < player.Y) Draw2DTextCent(enemy.Value.X, enemy.Value.Y + .5f, -2, 1.2f, 1.2f, Textures[enemy.Value.Texture]);
-                    else Draw2DTextCent(enemy.Value.X, enemy.Value.Y + .5f, -.5f, 1.2f, 1.2f, Textures[enemy.Value.Texture]);
+                    Draw2DTextCent(enemy.Value.X, enemy.Value.Y+.6f, OnScreenYtoZ(enemy.Value.Y), 1.2f, 1.2f, Textures[enemy.Value.Texture]);
                     Gl.glColor3f(0f, 0f, 0f);
                     Draw2DText(enemy.Value.X - .6f, enemy.Value.Y + 1.25f, -3, .9f, .15f, Textures["HPBAR"]);
                     Gl.glColor3f(1f, 0f, 0f);
@@ -207,16 +198,9 @@ namespace DX
 
 
             foreach (NPC npc in NPCList) {
-                if (npc.Y - .1f < player.Y)
-                {
-                    Draw2DText(npc.X - .75f, npc.Y, -2, 1.5f, 1.5f, Textures[npc.CalcAnim(npc)]);
-                    if (npc.ExMark(player)) Draw2DText(npc.X - .35f, npc.Y+1.65f, -2, .7f, .7f, Textures["ExMark"]);
-                }
-                else
-                {
-                    if (npc.ExMark(player)) Draw2DText(npc.X - .35f, npc.Y + 1.65f, -.7f, .7f,.7f, Textures["ExMark"]);
-                    Draw2DText(npc.X - .75f, npc.Y, -.5f, 1.5f, 1.5f, Textures[npc.CalcAnim(npc)]);
-                }
+                Gl.glColor3f(1, 1, 1);
+                Draw2DTextCent(npc.X, npc.Y + .6f, OnScreenYtoZ(npc.Y), 1.5f, 1.5f, Textures[npc.CalcAnim(npc)]);
+                if (npc.ExMark(player)) Draw2DTextCent(npc.X, npc.Y+1.65f, -2, .7f, .7f, Textures["ExMark"]);
             }
 
 
@@ -228,7 +212,7 @@ namespace DX
             //Отрисовка меню
             if (InvMenu)
             {
-                Gl.glColor3f(1, .8f, 0);
+                Gl.glColor3f(.3f, .15f, 0);
                 Draw2DText(1,2,-3,4,7,Textures["Menu"]);
                 Gl.glLoadIdentity();
                 DrawStringCent(1,5, 8.25f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, "Inventory", 1f, 1f, 1f, true);
@@ -292,7 +276,7 @@ namespace DX
             {
                 float TextCursor=0;
                 float Height;
-                Gl.glColor3f(1, .8f, 0);
+                Gl.glColor3f(.3f, .15f, 0);
                 Draw2DText(11,2,-3,4,7,Textures["Menu"]);
                 Gl.glLoadIdentity();
                 DrawStringCent(11, 15, 8.25f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, "Quests", 1f, 1f, 1f, true);
@@ -345,6 +329,105 @@ namespace DX
             AnT.Invalidate();
         }
 
+
+        private void LoginScreenRenderTimer_Tick(object sender, EventArgs e)
+        {
+            Gl.glClearDepth(.5);
+            Gl.glClear(Gl.GL_COLOR_BUFFER_BIT | Gl.GL_DEPTH_BUFFER_BIT);
+
+            Gl.glClearColor(255, 255, 255, 1);
+            if (LoginScreen) {
+                Gl.glLoadIdentity();
+                CamX += .01f;
+                CamY += .01f;
+
+                Gl.glPushMatrix();
+                Gl.glTranslatef(-CamX + ScrW / 2, -CamY + ScrH / 2, 0);
+
+                // Отрисовка окружения
+
+                for (int i = (int)CamX - 8; i < CamX + 8; i++)
+                {
+                    for (int j = (int)CamY - 5; j < CamY + 5; j++)
+                    {
+                        Gl.glColor3f(1f, 1f, 1f);
+                        //Текстуры карты
+                        if (i < 0 || j < 0 || i > map.GetUpperBound(0) || j > map.GetUpperBound(1)) continue;
+                        if (map[i, j] == 0) Draw2DText(i, j, 0, 1f, 1f, Textures["Grass"]);
+                        if (map[i, j] == 1) Draw2DText(i, j, 0, 1f, 1f, Textures["Ice"]);
+                        if (map[i, j] == 2) Draw2DText(i, j, 0, 1f, 1f, Textures["Sand"]);
+                        if (map[i, j] == 3) Draw2DText(i, j, 0, 1f, 1f, Textures["Ground"]);
+                        if (map[i, j] == 4) Draw2DText(i, j, 0, 1f, 1f, Textures["StWall"]);
+                        if (map[i, j] == 5) Draw2DText(i, j, -2.1f, 1f, 1f, Textures["StBlack"]);
+                        if (map[i, j] == 6) Draw2DText(i, j, 0, 1f, 1f, Textures["StFloor"]);
+                        if (map[i, j] == 7) Draw2DText(i, j, 0, 1f, 1f, Textures["WFloor"]);
+                        if (map[i, j] == 8) Draw2DText(i, j, -2.1f, 1f, 1f, Textures["StBlack"]);
+
+                        //Текстуры объектов
+                        if (obj_map[i, j] == 1) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadD"]);
+                        if (obj_map[i, j] == 2) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadL"]);
+                        if (obj_map[i, j] == 3) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadLD"]);
+                        if (obj_map[i, j] == 4) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadLU"]);
+                        if (obj_map[i, j] == 5) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadR"]);
+                        if (obj_map[i, j] == 6) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadRD"]);
+                        if (obj_map[i, j] == 7) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadRU"]);
+                        if (obj_map[i, j] == 8) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadU"]);
+                        if (obj_map[i, j] == 9) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadZDL"]);
+                        if (obj_map[i, j] == 10) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadZDR"]);
+                        if (obj_map[i, j] == 11) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadZUL"]);
+                        if (obj_map[i, j] == 12) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadZUR"]);
+                    }
+                }
+                Gl.glLoadIdentity();
+
+                MousePosOnAnt(out MouseX, out MouseY, out MouseOnMatrixX, out MouseOnMatrixY);
+                Gl.glColor4f(1, 1, 1, 1);
+                Draw2DText(MouseOnMatrixX, MouseOnMatrixY - .5f, -4, .5f, .5f, Textures["Cursor"]);
+
+                Gl.glFlush();
+                AnT.Invalidate();
+            }
+            else
+            {
+
+                player = new Player(34, 65);
+
+                AllPlayers = new List<Player>();
+                AllPlayers.Add(player);
+
+                EnemyList = new Dictionary<int, Enemy>();
+
+                EnemyList.Add(0, new Ghost(38, 32, RNG));
+                EnemyList.Add(1, new Ghost(36, 36, RNG));
+                EnemyList.Add(2, new Ghost(38, 35, RNG));
+                EnemyList.Add(3, new Ghost(36, 31, RNG));
+                EnemyList.Add(4, new Ghost(38, 32, RNG));
+                EnemyList.Add(5, new Ghost(36, 38, RNG));
+                EnemyList.Add(6, new Ghost(38, 39, RNG));
+                EnemyList.Add(7, new Ghost(36, 37, RNG));
+
+                DropList = new List<Item>();
+
+                //Инициализация NPC
+
+                NPCList = new List<NPC>();
+
+                NPCDelegates _NPCDelegates = new NPCDelegates();
+
+                NPCList.Add(new DX.NPC(32, 60, new string[] { "IdleD" }, new NPCClickFuncDel(NPCDelegates.AndreClickFunc), new NPCCalcAnimDel(NPCDelegates.AndreCalcAnim), new NPCExMarkDel(NPCDelegates.AndreExMark)));
+
+                Item.Drop = DropList;
+
+                player.Inventory.Add(new Potion(PotionType.Health, 2));
+
+                RenderTimer.Start();
+                LogicTimer.Start();
+                QuestCheckTimer.Start();
+                LoginScreenRenderTimer.Stop();
+            }
+        }
+
+
         private void LogicTimer_Tick(object sender, EventArgs e)
         {
             player.CheckDeath();
@@ -365,6 +448,7 @@ namespace DX
 
 
 
+
         private void QuestCheckTimer_Tick(object sender, EventArgs e)
         {
             foreach (Player player in AllPlayers)
@@ -372,6 +456,9 @@ namespace DX
                 player.CheckQuests();
             }
         }
+
+
+
 
         public Form1()
         {
@@ -472,23 +559,7 @@ namespace DX
             Gl.glClearDepth(1.0);
             Gl.glBlendFunc(Gl.GL_SRC_ALPHA, Gl.GL_ONE_MINUS_SRC_ALPHA);
 
-            player = new Player(34, 65);
 
-            AllPlayers = new List<Player>();
-            AllPlayers.Add(player);
-
-            EnemyList = new Dictionary<int, Enemy>();
-
-            EnemyList.Add(0, new Ghost(38, 32, RNG));
-            EnemyList.Add(1, new Ghost(36, 36, RNG));
-            EnemyList.Add(2, new Ghost(38, 35, RNG));
-            EnemyList.Add(3, new Ghost(36, 31, RNG));
-            EnemyList.Add(4, new Ghost(38, 32, RNG));
-            EnemyList.Add(5, new Ghost(36, 38, RNG));
-            EnemyList.Add(6, new Ghost(38, 39, RNG));
-            EnemyList.Add(7, new Ghost(36, 37, RNG));
-
-            DropList = new List<Item>();
 
             Map MapReader = new Map("map.bmp");
 
@@ -497,18 +568,6 @@ namespace DX
             Map ObjMapReader = new Map("obj_map.bmp");
 
             obj_map = ObjMapReader.MapArray();
-
-            //Инициализация NPC
-
-            NPCList = new List<NPC>();
-
-            NPCDelegates _NPCDelegates = new NPCDelegates();
-
-            NPCList.Add(new DX.NPC(32, 60, new string[]{"IdleD"},new NPCClickFuncDel(NPCDelegates.AndreClickFunc), new NPCCalcAnimDel(NPCDelegates.AndreCalcAnim), new NPCExMarkDel(NPCDelegates.AndreExMark)));
-
-            Item.Drop = DropList;
-
-            player.Inventory.Add(new Potion(PotionType.Health, 2));
 
             //objects
             //Загрузил 12 текстурок, вместо 3, ведь вращать не додумался 
@@ -607,38 +666,44 @@ namespace DX
             Textures.Add("HeroAtkD1", LoadTexture("Tex//Attack//down_1.png"));
 
 
+            LoginScreenRenderTimer.Start();
             // активация таймера, вызывающего функцию для визуализации 
-            RenderTimer.Start();
-            LogicTimer.Start();
-            QuestCheckTimer.Start();
         }
 
         private void ControlTimer_Tick(object sender, EventArgs e)
         {
-            bool W = IsKeyDown(Keys.W);
-            bool A = IsKeyDown(Keys.A);
-            bool S = IsKeyDown(Keys.S);
-            bool D = IsKeyDown(Keys.D);
-            player.MovedByControl(W, A, S, D, map);
+            if (!LoginScreen && player != null)
+            {
+                bool W = IsKeyDown(Keys.W);
+                bool A = IsKeyDown(Keys.A);
+                bool S = IsKeyDown(Keys.S);
+                bool D = IsKeyDown(Keys.D);
+                player.MovedByControl(W, A, S, D, map);
+            }
         }
 
 
 
         private void AnT_MouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left) {
-                player.AttackFunc(GetNearbyEnemies(player.X, player.Y, EnemyList));
-            }
-            if (e.Button == MouseButtons.Right) {
-                int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
-                int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
-                if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height) player.Inventory.Activate((int)Y * player.Inventory.Width + (int)X);
-                MousePosOnMap();
-                label1.Text = MouseOnMapX.ToString() + " " + MouseOnMapY.ToString();
-                foreach (NPC npc in GetNearbyNPCs(player.X, player.Y, NPCList))
+            if (!LoginScreen&&player!=null)
+            {
+                if (e.Button == MouseButtons.Left)
                 {
-                    if (MouseOnMapX > npc.X - .5f && MouseOnMapX < npc.X + .5f && MouseOnMapY > npc.Y && MouseOnMapY < npc.Y + 1) {
-                        npc.ClickFunc(player, npc);
+                    player.AttackFunc(GetNearbyEnemies(player.X, player.Y, EnemyList));
+                }
+                if (e.Button == MouseButtons.Right)
+                {
+                    int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
+                    int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
+                    if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height) player.Inventory.Activate((int)Y * player.Inventory.Width + (int)X);
+                    MousePosOnMap();
+                    foreach (NPC npc in GetNearbyNPCs(player.X, player.Y, NPCList))
+                    {
+                        if (MouseOnMapX > npc.X - .5f && MouseOnMapX < npc.X + .5f && MouseOnMapY > npc.Y && MouseOnMapY < npc.Y + 1)
+                        {
+                            npc.ClickFunc(player, npc);
+                        }
                     }
                 }
             }
@@ -646,40 +711,44 @@ namespace DX
 
         private void AnT_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.E) {
-                Item Nearest = GetNearestItem();
-                if (Nearest != null)
-                {
-                    Item pickup = (Item)Nearest.Clone();
-                    DropList.Remove(Nearest);
-                    player.Inventory.Add(pickup);
-                }
-            }
-            if (InvMenu)
+            if (!LoginScreen && player != null)
             {
-                if (e.KeyCode == Keys.G)
+                if (e.KeyCode == Keys.E)
                 {
-                    int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
-                    int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
-                    if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height) player.Inventory.Items[(int)Y * player.Inventory.Width + (int)X] = null;
+                    Item Nearest = GetNearestItem();
+                    if (Nearest != null)
+                    {
+                        Item pickup = (Item)Nearest.Clone();
+                        DropList.Remove(Nearest);
+                        player.Inventory.Add(pickup);
+                    }
                 }
+                if (InvMenu)
+                {
+                    if (e.KeyCode == Keys.G)
+                    {
+                        int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
+                        int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
+                        if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height) player.Inventory.Items[(int)Y * player.Inventory.Width + (int)X] = null;
+                    }
 
-                if (e.KeyCode == Keys.Y)
-                {
-                    int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
-                    int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
-                    if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height && player.Inventory.Items[(int)Y * player.Inventory.Width + (int)X] != null) player.Inventory.Drop((int)Y * player.Inventory.Width + (int)X);
+                    if (e.KeyCode == Keys.Y)
+                    {
+                        int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
+                        int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
+                        if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height && player.Inventory.Items[(int)Y * player.Inventory.Width + (int)X] != null) player.Inventory.Drop((int)Y * player.Inventory.Width + (int)X);
+                    }
+                    if (e.KeyCode == Keys.T)
+                    {
+                        int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
+                        int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
+                        if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height && player.Inventory.Items[(int)Y * player.Inventory.Width + (int)X] != null) player.Inventory.DropOne((int)Y * player.Inventory.Width + (int)X);
+                    }
                 }
-                if (e.KeyCode == Keys.T)
-                {
-                    int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
-                    int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
-                    if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height && player.Inventory.Items[(int)Y * player.Inventory.Width + (int)X] != null) player.Inventory.DropOne((int)Y * player.Inventory.Width + (int)X);
-                }
+                if (e.KeyCode == Keys.J) QuestMenu = !QuestMenu;
+                if (e.KeyCode == Keys.I) InvMenu = !InvMenu;
+                if (e.KeyCode == Keys.Escape) { InvMenu = false; QuestMenu = false; }
             }
-            if (e.KeyCode == Keys.J) QuestMenu = !QuestMenu;
-            if (e.KeyCode == Keys.I) InvMenu = !InvMenu;
-            if (e.KeyCode == Keys.Escape) { InvMenu = false; QuestMenu = false; }
         }
 
         void MousePosOnAnt(out int X,out int Y, out float MouseOnMatrixX, out float MouseOnMatrixY) {
@@ -769,6 +838,11 @@ namespace DX
         }
 
 
+        float OnScreenYtoZ(float Y) {
+            return -.15f-ScrH/6 + (Y - player.Y + ScrH / 2)/6;
+        }
+
+
         Dictionary<int, Enemy> GetNearbyEnemies(float playerX, float playerY, Dictionary<int, Enemy> Enemies) {
             Dictionary<int, Enemy> output = new Dictionary<int, Enemy>();
             foreach (KeyValuePair<int, Enemy> enemy in Enemies) {
@@ -790,6 +864,15 @@ namespace DX
                 }
             }
             return output;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            textBox1.Enabled = false;
+            button1.Enabled = false;
+            textBox1.Visible = false;
+            button1.Visible = false;
+            LoginScreen = false;
         }
 
         List<NPC> GetNearbyNPCs(float playerX, float playerY, List<NPC> NPCs)

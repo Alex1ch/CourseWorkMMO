@@ -149,8 +149,8 @@ namespace DX
             base.FinishState = 3;
             base.Name = "Dark Signs";
             base.Desc = new string[base.FinishState];
-            Desc[0] = "You find some strange spoil\non the floor and then you saw\nthe Scary Ghost tourchering\npeople, you should kill them (0/" + killlimit.ToString()+")" ;
-            Desc[1] = "Civilians saved, Ghosts were killed,\n return to Andre for your reward";
+            Desc[0] = "Andre asked for your help\nthe Scary Ghost's tourchering\npeople on the south, you should \nkill them all (0/" + killlimit.ToString()+")" ;
+            Desc[1] = "Civilians saved, Ghosts were killed,\nreturn to Andre for your reward";
             Desc[2] = "Quest Complete!";
         }
 
@@ -169,7 +169,7 @@ namespace DX
                         if (counter != player.KilledEnemies[1] - startkills)
                         {
                             counter = player.KilledEnemies[1] - startkills;
-                            Desc[0] = "You find some strange spoil\non the floor and then you saw\nthe Scary Ghost tourchering\npeople, you should kill them (" + counter.ToString() + "/" + killlimit.ToString() + ")";
+                            Desc[0] = "Andre asked for your help\nthe Scary Ghost's tourchering\npeople on the south, you should \nkill them all (" + counter.ToString() + "/" + killlimit.ToString() + ")";
                             if (counter >= killlimit) StateUp();
                                 else PopUpFunc();
                         }

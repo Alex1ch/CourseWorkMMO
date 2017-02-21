@@ -20,6 +20,8 @@ namespace DX
         int[] killedEnemies = new int[100];
 
         bool up = false;
+        bool dialogMenu=false;
+        string dialogMenuText = "";
         bool down = false;
         bool left = false;
         bool right = false;
@@ -531,5 +533,30 @@ namespace DX
             }
         }
 
+        public bool DialogMenu
+        {
+            get
+            {
+                return dialogMenu;
+            }
+
+            set
+            {
+                dialogMenu = value;
+            }
+        }
+
+        public string DialogMenuText
+        {
+            get
+            {
+                return dialogMenuText;
+            }
+
+            set
+            {
+                dialogMenuText = value;
+            }
+        }
     }
 }
