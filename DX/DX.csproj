@@ -69,6 +69,7 @@
     <Compile Include="Inventory.cs" />
     <Compile Include="Item.cs" />
     <Compile Include="Map.cs" />
+    <Compile Include="NetCode.cs" />
     <Compile Include="NPC.cs" />
     <Compile Include="NPCDelegates.cs" />
     <Compile Include="Program.cs" />

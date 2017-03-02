@@ -12,15 +12,23 @@ using Tao.Platform.Windows;
 using Tao.OpenGl;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using System.IO;
+using System.Net;
 
 namespace DX
 {
     public partial class Form1 : Form
     {
+        Task Reader;
+
+        NetGame connect;
         Random RNG;
+
+        string LoginScreenErr = "";
 
         Dictionary<string, int> Textures;
         Dictionary<int, Enemy> EnemyList;
+        List<Player> PlayersList=new List<Player>();
         List<Item> DropList;
         List<Player> AllPlayers;
         List<NPC> NPCList;
@@ -200,7 +208,8 @@ namespace DX
             foreach (NPC npc in NPCList) {
                 Gl.glColor3f(1, 1, 1);
                 Draw2DTextCent(npc.X, npc.Y + .6f, OnScreenYtoZ(npc.Y), 1.5f, 1.5f, Textures[npc.CalcAnim(npc)]);
-                if (npc.ExMark(player)) Draw2DTextCent(npc.X, npc.Y+1.65f, -2, .7f, .7f, Textures["ExMark"]);
+                DrawStringCent(npc.X-2,npc.X+2, npc.Y + 1.2f,-3.1f,Glut.GLUT_BITMAP_HELVETICA_12,npc.Name,1,1,1,true);
+                if (npc.ExMark(player)) Draw2DTextCent(npc.X, npc.Y+1.75f, -2, .7f, .7f, Textures["ExMark"]);
             }
 
 
@@ -297,6 +306,19 @@ namespace DX
                 }
             }
 
+            if (player.DialogMenu) {
+                if (!player.Trade)
+                {
+                    Gl.glColor3f(.3f, .15f, 0);
+                    Draw2DText(5.5f, .5f, -3, 5, 2.5f, Textures["Menu"]);
+                    Gl.glLoadIdentity();
+                    DrawString(6, 2.5f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, player.DialogMenuText, 1f, 1f, 1f, true);
+                }
+                else {
+
+                }
+            }
+
             //Уведомления изменения квестов
             foreach (Quest quest in player.Quests) {
                 if (quest.PopUp)
@@ -323,6 +345,12 @@ namespace DX
             Draw2DText(1, 1, -4, 4, .3f, Textures["HPBAR"]);
             Gl.glColor3f(1f, 0, 0);
             Draw2DText(1, 1, -4, 4*((float)player.Hp / (float)player.MaxHp) > 0 ? 4 * ((float)player.Hp / (float)player.MaxHp):0, .3f , Textures["HPBAR"]);
+
+
+
+            //OtherShieeeet
+
+            DrawString(.3f,.3f,-4,Glut.GLUT_BITMAP_HELVETICA_10,player.X.ToString()+";"+player.Y.ToString(),1,1,1,true);
 
 
             Gl.glFlush();
@@ -357,7 +385,7 @@ namespace DX
                         if (map[i, j] == 1) Draw2DText(i, j, 0, 1f, 1f, Textures["Ice"]);
                         if (map[i, j] == 2) Draw2DText(i, j, 0, 1f, 1f, Textures["Sand"]);
                         if (map[i, j] == 3) Draw2DText(i, j, 0, 1f, 1f, Textures["Ground"]);
-                        if (map[i, j] == 4) Draw2DText(i, j, 0, 1f, 1f, Textures["StWall"]);
+                        if (map[i, j] == 4) Draw2DText(i, j, OnScreenYtoZ(j-1), 1f, 1f, Textures["StWall"]);
                         if (map[i, j] == 5) Draw2DText(i, j, -2.1f, 1f, 1f, Textures["StBlack"]);
                         if (map[i, j] == 6) Draw2DText(i, j, 0, 1f, 1f, Textures["StFloor"]);
                         if (map[i, j] == 7) Draw2DText(i, j, 0, 1f, 1f, Textures["WFloor"]);
@@ -376,6 +404,7 @@ namespace DX
                         if (obj_map[i, j] == 10) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadZDR"]);
                         if (obj_map[i, j] == 11) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadZUL"]);
                         if (obj_map[i, j] == 12) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadZUR"]);
+                        if (obj_map[i, j] == 13) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadW"]);
                     }
                 }
                 Gl.glLoadIdentity();
@@ -383,6 +412,7 @@ namespace DX
                 MousePosOnAnt(out MouseX, out MouseY, out MouseOnMatrixX, out MouseOnMatrixY);
                 Gl.glColor4f(1, 1, 1, 1);
                 Draw2DText(MouseOnMatrixX, MouseOnMatrixY - .5f, -4, .5f, .5f, Textures["Cursor"]);
+                DrawStringCent(0,ScrW,3,-4,Glut.GLUT_BITMAP_HELVETICA_18,LoginScreenErr,1,0,0,true);
 
                 Gl.glFlush();
                 AnT.Invalidate();
@@ -390,31 +420,39 @@ namespace DX
             else
             {
 
-                player = new Player(34, 65);
+                player = new Player(63, 60, textBox1.Text);
 
                 AllPlayers = new List<Player>();
                 AllPlayers.Add(player);
+                
 
                 EnemyList = new Dictionary<int, Enemy>();
 
-                EnemyList.Add(0, new Ghost(38, 32, RNG));
-                EnemyList.Add(1, new Ghost(36, 36, RNG));
-                EnemyList.Add(2, new Ghost(38, 35, RNG));
-                EnemyList.Add(3, new Ghost(36, 31, RNG));
-                EnemyList.Add(4, new Ghost(38, 32, RNG));
-                EnemyList.Add(5, new Ghost(36, 38, RNG));
-                EnemyList.Add(6, new Ghost(38, 39, RNG));
-                EnemyList.Add(7, new Ghost(36, 37, RNG));
+                EnemyList.Add(0, new Ghost(80, 70, RNG));
+                EnemyList.Add(1, new Ghost(82, 69, RNG));
+                EnemyList.Add(2, new Ghost(84, 68, RNG));
+                EnemyList.Add(3, new Ghost(85, 69, RNG));
+                EnemyList.Add(4, new Ghost(84, 68, RNG));
+                EnemyList.Add(5, new Ghost(79, 68, RNG));
+                EnemyList.Add(6, new Ghost(81, 69, RNG));
 
                 DropList = new List<Item>();
 
                 //Инициализация NPC
 
+                StreamReader SR = new StreamReader(File.OpenRead("NPCDialogs"));
+                
                 NPCList = new List<NPC>();
 
                 NPCDelegates _NPCDelegates = new NPCDelegates();
 
-                NPCList.Add(new DX.NPC(32, 60, new string[] { "IdleD" }, new NPCClickFuncDel(NPCDelegates.AndreClickFunc), new NPCCalcAnimDel(NPCDelegates.AndreCalcAnim), new NPCExMarkDel(NPCDelegates.AndreExMark)));
+                string Name;
+                List<string> dialogs = ReadDialog(out Name, SR);
+
+                NPCList.Add(new DX.NPC(76, 63,Name, new string[] { "IdleD" }, new NPCClickFuncDel(NPCDelegates.AndreClickFunc), new NPCCalcAnimDel(NPCDelegates.AndreCalcAnim), new NPCExMarkDel(NPCDelegates.AndreExMark),dialogs));
+
+                dialogs = ReadDialog(out Name, SR);
+                NPCList.Add(new DX.NPC(78,60,Name, new string[] { "IdleL" },new NPCClickFuncDel(NPCDelegates.VendorClickFunc),new NPCCalcAnimDel(NPCDelegates.VendorCalcAnim),new NPCExMarkDel(NPCDelegates.VendorExMark),dialogs));
 
                 Item.Drop = DropList;
 
@@ -423,6 +461,20 @@ namespace DX
                 RenderTimer.Start();
                 LogicTimer.Start();
                 QuestCheckTimer.Start();
+
+                Reader=new Task(() => {
+                    while (true) {
+                        if (this.IsDisposed) {
+                            connect.End_Session();
+                            return;
+                        }
+                        //connect.Recv_Msg;
+                    }
+
+                });
+
+                Reader.Start();
+
                 LoginScreenRenderTimer.Stop();
             }
         }
@@ -433,6 +485,15 @@ namespace DX
             player.CheckDeath();
             player.CalcAnim();
             player.CalcRotation(MouseX, MouseY, AnT.Width / 2, AnT.Height / 2);
+
+            byte Direction=0;
+
+            if (player.LEFT) Direction = 3;
+            if (player.RIGHT) Direction = 1;
+            if (player.DOWN) Direction = 4;
+            if (player.UP) Direction = 2;
+
+             connect.SetXYD(player.X,player.Y,Direction);
 
             foreach (KeyValuePair<int, Enemy> enemy in GetNearbyEnemies(player.X, player.Y, EnemyList))
             {
@@ -559,8 +620,6 @@ namespace DX
             Gl.glClearDepth(1.0);
             Gl.glBlendFunc(Gl.GL_SRC_ALPHA, Gl.GL_ONE_MINUS_SRC_ALPHA);
 
-
-
             Map MapReader = new Map("map.bmp");
 
             map = MapReader.MapArray();
@@ -583,6 +642,7 @@ namespace DX
             Textures.Add("RoadZDR", LoadTexture("Tex//RoadText//ZDR.png"));
             Textures.Add("RoadZDL", LoadTexture("Tex//RoadText//ZDL.png"));
             Textures.Add("RoadZUL", LoadTexture("Tex//RoadText//ZUL.png"));
+            Textures.Add("RoadW", LoadTexture("Tex//RoadText//W.png"));
 
 
             //textures
@@ -702,6 +762,7 @@ namespace DX
                     {
                         if (MouseOnMapX > npc.X - .5f && MouseOnMapX < npc.X + .5f && MouseOnMapY > npc.Y && MouseOnMapY < npc.Y + 1)
                         {
+                            player.Trade = false;
                             npc.ClickFunc(player, npc);
                         }
                     }
@@ -868,11 +929,50 @@ namespace DX
 
         private void button1_Click(object sender, EventArgs e)
         {
-            textBox1.Enabled = false;
-            button1.Enabled = false;
-            textBox1.Visible = false;
-            button1.Visible = false;
-            LoginScreen = false;
+            if (textBox1.Text == "Offline")
+            {
+                textBox1.Enabled = false;
+                textBox2.Enabled = false;
+                button1.Enabled = false;
+                textBox1.Visible = false;
+                textBox2.Visible = false;
+                button1.Visible = false;
+                LoginScreen = false;
+            }
+
+            IPAddress useless;
+            string ip;
+            string char_name;
+            if (textBox1.Text != "") char_name = textBox1.Text;  else { 
+                LoginScreenErr = "Empty Name"; return;
+            }
+            
+            if (textBox2.Text != "") ip = textBox2.Text;
+            else
+            {
+                LoginScreenErr = "Empty IP"; return;
+            }
+
+            if (!IPAddress.TryParse(ip, out useless))
+            {
+                LoginScreenErr = "Wrong IP Format"; return;
+            };
+
+            connect = new NetGame(ip, 4445, 4444, 4446); //Server ip, log port, game port, my port
+            if (connect.LogNstart_Session(char_name))
+            {
+                textBox1.Enabled = false;
+                textBox2.Enabled = false;
+                button1.Enabled = false;
+                textBox1.Visible = false;
+                textBox2.Visible = false;
+                button1.Visible = false;
+                LoginScreen = false;
+
+            }
+            else {
+                LoginScreenErr = "Can't connect to server";
+                return; }
         }
 
         List<NPC> GetNearbyNPCs(float playerX, float playerY, List<NPC> NPCs)
@@ -921,8 +1021,36 @@ namespace DX
         {
             Cursor.Show();
         }
+
+
+        List<string> ReadDialog(out string Name,StreamReader SR) {
+            Name = SR.ReadLine();
+            List<string> dialogs = new List<string>();
+            string sum = "";
+            string thisstring = "";
+            thisstring = SR.ReadLine();
+            while (thisstring != "<end>")
+            {
+                if (thisstring == "<next>")
+                {
+                    dialogs.Add(sum);
+                    sum = "";
+                }
+                else
+                    sum += thisstring + "\n";
+                thisstring = SR.ReadLine();
+            }
+
+            return dialogs;
+        }
+
+
+
+        
+
         
         [DllImport("user32.dll")]
         public extern static Int16 GetKeyState(Int16 nVirtKey);
     }
+    
 }

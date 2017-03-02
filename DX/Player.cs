@@ -9,6 +9,7 @@ namespace DX
 {
     public class Player
     {
+        int id;
         float x=32, y=32;
         float rotation;
         float basespeed = .05f;
@@ -17,10 +18,13 @@ namespace DX
         float maxHp = 100;
         float hpUp=0;
 
+        string name;
+
         int[] killedEnemies = new int[100];
 
         bool up = false;
         bool dialogMenu=false;
+        bool trade = false;
         string dialogMenuText = "";
         bool down = false;
         bool left = false;
@@ -47,11 +51,21 @@ namespace DX
             rotation=(float)(Math.Atan2((Y - y) , (X - x)) / Math.PI * 180); 
         }
 
-        public Player(float pX, float pY, Inventory _inventory)
+        public Player(float pX, float pY, Inventory _inventory, string _name)
         {
+            name = _name;
             quests.Add(new DarkSignsQuest());
             x = pX; y = pY;
             inventory = _inventory;
+        }
+
+
+        public Player(float pX, float pY,string _name)
+        {
+            name = _name;
+            quests.Add(new DarkSignsQuest());
+            x = pX; y = pY;
+            inventory = new Inventory(this);
         }
 
 
@@ -62,12 +76,6 @@ namespace DX
             }
         }
 
-        public Player(float pX, float pY)
-        {
-            quests.Add(new DarkSignsQuest());
-            x = pX; y = pY;
-            inventory = new Inventory(this);
-        }
 
         public void CalcAnim() {
             frameskiplimit = (int)(0.2f/(basespeed + speedbuff));
@@ -556,6 +564,45 @@ namespace DX
             set
             {
                 dialogMenuText = value;
+            }
+        }
+
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+
+            set
+            {
+                name = value;
+            }
+        }
+
+        public bool Trade
+        {
+            get
+            {
+                return trade;
+            }
+
+            set
+            {
+                trade = value;
+            }
+        }
+
+        public int Id
+        {
+            get
+            {
+                return id;
+            }
+
+            set
+            {
+                id = value;
             }
         }
     }

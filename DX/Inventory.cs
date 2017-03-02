@@ -10,7 +10,6 @@ namespace DX
     {
         Item[] items;
         Player player;
-        int size = 24;
         int width=4;
         int height = 6;
 

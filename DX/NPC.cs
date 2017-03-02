@@ -13,6 +13,14 @@ namespace DX
 
     public class NPC
     {
+        bool vendor=false;
+
+        Item[] goods;
+
+        string name;
+
+        List<string> dialogs;
+
         float x;
         float y;
 
@@ -23,13 +31,29 @@ namespace DX
         public NPCCalcAnimDel CalcAnim;
         public NPCExMarkDel ExMark;
 
-        public NPC(float X, float Y, string[] Textures, NPCClickFuncDel clickFunc, NPCCalcAnimDel calcAnim,NPCExMarkDel exMark) {
+        public NPC(float X, float Y,string _name, string[] Textures, NPCClickFuncDel clickFunc, NPCCalcAnimDel calcAnim, NPCExMarkDel exMark, List<string> _dialogs) {
             textures = Textures;
+            dialogs = _dialogs;
+            name = _name;
             x = X;
             y = Y;
             ClickFunc = clickFunc;
             CalcAnim = calcAnim;
             ExMark=exMark;
+        }
+
+        public NPC(float X, float Y, string _name, string[] Textures, NPCClickFuncDel clickFunc, NPCCalcAnimDel calcAnim, NPCExMarkDel exMark, List<string> _dialogs, Item[] _goods)
+        {
+            vendor = true;
+            goods = _goods;
+            textures = Textures;
+            dialogs = _dialogs;
+            name = _name;
+            x = X;
+            y = Y;
+            ClickFunc = clickFunc;
+            CalcAnim = calcAnim;
+            ExMark = exMark;
         }
 
         public NPC(float X, float Y, string[] Textures, NPCClickFuncDel clickFunc)
@@ -81,6 +105,45 @@ namespace DX
             set
             {
                 textures = value;
+            }
+        }
+
+        public List<string> Dialogs
+        {
+            get
+            {
+                return dialogs;
+            }
+
+            set
+            {
+                dialogs = value;
+            }
+        }
+
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+
+            set
+            {
+                name = value;
+            }
+        }
+
+        public bool Vendor
+        {
+            get
+            {
+                return vendor;
+            }
+
+            set
+            {
+                vendor = value;
             }
         }
     }
