@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace DX
 {
@@ -17,13 +18,14 @@ namespace DX
             Task.Factory.StartNew(() =>
             {
                 player.DialogMenu = true;
-                if (player.Quests[0].State != 3) player.DialogMenuText = ThisNPC.Name +":\n"+ThisNPC.Dialogs[player.Quests[0].State + 1];
-                else player.DialogMenuText = ThisNPC.Name + ":\n" + ThisNPC.Dialogs[0];
+                if (player.Quests[0].State != 3) ThisNPC.DialogMenuText = ThisNPC.Dialogs[player.Quests[0].State + 1];
+                else ThisNPC.DialogMenuText = ThisNPC.Dialogs[0];
 
                 //if (player.Quests[0].State == 0 || player.Quests[0].State == 2) player.Quests[0].StateUp();
 
 
                 while (Math.Sqrt((ThisNPC.X - player.X) * (ThisNPC.X - player.X) + (ThisNPC.Y - player.Y) * (ThisNPC.Y - player.Y))<3f) {
+                    Thread.Sleep(30);
                     if (IsKeyDown(Keys.D1) && (player.Quests[0].State == 0 || player.Quests[0].State == 2)) {
                         player.Quests[0].StateUp();
                         break;
@@ -45,6 +47,8 @@ namespace DX
         }
 
 
+
+
         //Vendor
 
         static public void VendorClickFunc(Player player, NPC ThisNPC)
@@ -52,15 +56,17 @@ namespace DX
             Task.Factory.StartNew(() =>
             {
                 player.DialogMenu = true;
-                player.DialogMenuText = ThisNPC.Dialogs[0];
+                ThisNPC.DialogMenuText = ThisNPC.Dialogs[0];
 
-                while (Math.Sqrt((ThisNPC.X - player.X) * (ThisNPC.X - player.X) + (ThisNPC.Y - player.Y) * (ThisNPC.Y - player.Y)) < 3f) {
+                while (Math.Sqrt((ThisNPC.X - player.X) * (ThisNPC.X - player.X) + (ThisNPC.Y - player.Y) * (ThisNPC.Y - player.Y)) < 3f)
+                {
+                    Thread.Sleep(30);
                     if (IsKeyDown(Keys.D1)) {
-                        player.Trade = true;
+                        ThisNPC.Trade = true; 
                     } 
                     if (IsKeyDown(Keys.D2)) break;
                 }
-                player.Trade = false;
+                ThisNPC.Trade = false;
                 player.DialogMenu = false;
             });
         }

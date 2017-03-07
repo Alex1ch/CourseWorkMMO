@@ -19,6 +19,46 @@ namespace DX
         }
 
 
+        public bool Take(int id,int quantity) {
+            Decimal sum=0;
+            for (int i = 0; i < Size; i++) {
+                if (items[i] != null)
+                {
+                    if (items[i].Id == id)
+                    {
+                        sum += items[i].Quantity;
+                    }
+                }
+            }
+            if (quantity > sum) return false;
+            for (int i = 0; i < Size; i++) {
+                if (items[i] != null)
+                {
+                    if (items[i].Id == id)
+                    {
+                        if (quantity == items[i].Quantity)
+                        {
+                            items[i] = null;
+                            return true;
+                        }
+                        if (quantity > items[i].Quantity)
+                        {
+                            quantity -= items[i].Quantity;
+                            items[i] = null;
+                        }
+                        if (quantity < items[i].Quantity)
+                        {
+                            items[i].Quantity -= quantity;
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+
         public Inventory(Player _player)
         {
             items = new Item[Size];
@@ -42,20 +82,24 @@ namespace DX
             if (item.Quantity == 0) return;
             for (int i = 0; i < Size; i++)
             {
-                if(items[i] == null)continue;
-                if (items[i].Id == item.Id&&items[i].Quantity!=items[i].MaxQuantity) {
+                if (items[i] == null) continue;
+                if (items[i].Id == item.Id && items[i].Quantity != items[i].MaxQuantity)
+                {
                     int quantity = items[i].Quantity;
-                    items[i].Quantity += item.Quantity;
-                    if (items[i].QuantityHighCheck())
+                    uint sum = (uint)(items[i].Quantity + item.Quantity);
+                    if (sum>items[i].MaxQuantity)
                     {
                         int maxQuantity = items[i].MaxQuantity;
                         item.Quantity -= maxQuantity - quantity;
                         items[i].Quantity = maxQuantity;
                         this.Add(item);
                     }
+                    else
+                        items[i].Quantity += item.Quantity;
                     return;
                 }
             }
+
 
             for (int i = 0; i < Size; i++)
             {
@@ -75,6 +119,7 @@ namespace DX
             }
             item.DropItem(player.X,player.Y);
         }
+
 
         public void Delete(int Invid) {
             items[Invid] = null;

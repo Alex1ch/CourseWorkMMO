@@ -13,9 +13,13 @@ namespace DX
 
     public class NPC
     {
+        bool trade = false;
+        string dialogMenuText = "";
+
         bool vendor=false;
 
         Item[] goods;
+        int[] prices;
 
         string name;
 
@@ -42,10 +46,15 @@ namespace DX
             ExMark=exMark;
         }
 
-        public NPC(float X, float Y, string _name, string[] Textures, NPCClickFuncDel clickFunc, NPCCalcAnimDel calcAnim, NPCExMarkDel exMark, List<string> _dialogs, Item[] _goods)
+        public NPC(float X, float Y, string _name, string[] Textures, NPCClickFuncDel clickFunc, NPCCalcAnimDel calcAnim, NPCExMarkDel exMark, List<string> _dialogs, object[,] _goods)
         {
             vendor = true;
-            goods = _goods;
+            Goods = new Item[_goods.Length / 2];
+            prices = new int[_goods.Length / 2];
+            for (int i = 0; i < _goods.Length/2; i++) {
+                Goods[i] = (Item)_goods[i, 0];
+                prices[i] = (int)_goods[i, 1];
+            }
             textures = Textures;
             dialogs = _dialogs;
             name = _name;
@@ -64,6 +73,11 @@ namespace DX
             ClickFunc = clickFunc;
         }
 
+        public void Sell(Player player, int index) {
+            Item clone = (Item)goods[index].Clone();
+            if(player.Inventory.Take(69, prices[index]))
+            player.Inventory.Add(clone);
+        }
 
         public void CheckQuests() {
 
@@ -144,6 +158,58 @@ namespace DX
             set
             {
                 vendor = value;
+            }
+        }
+
+        public bool Trade
+        {
+            get
+            {
+                return trade;
+            }
+
+            set
+            {
+                trade = value;
+            }
+        }
+
+        public string DialogMenuText
+        {
+            get
+            {
+                return dialogMenuText;
+            }
+
+            set
+            {
+                dialogMenuText = value;
+            }
+        }
+
+        public int[] Prices
+        {
+            get
+            {
+                return prices;
+            }
+
+            set
+            {
+                prices = value;
+            }
+        }
+
+        public Item[] Goods
+        {
+            get
+            {
+                return goods;
+            }
+
+            set
+            {
+                goods = value;
             }
         }
     }

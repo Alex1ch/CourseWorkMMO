@@ -228,6 +228,38 @@ namespace DX
         }
     }
 
+    public class Gold : Item
+    {
+        public Gold(float X, float Y, int quantity) {
+            base.X = X;
+            base.Y = Y;
+            base.Id = 69;
+            base.MaxQuantity = int.MaxValue;
+            base.Dropped = true;
+            base.Quantity = quantity;
+            base.Name = "Gold";
+            base.Desc = "Makes you happy?";
+            base.NameR = 1;
+            base.NameG = 1;
+            base.NameB = .3f;
+            base.Texture = "ItemGold";
+        }
+
+
+        public Gold(int quantity)
+        {
+            base.Id = 69;
+            base.MaxQuantity = int.MaxValue;
+            base.Quantity = quantity;
+            base.Name = "Gold";
+            base.Desc = "Makes you happy?";
+            base.NameR = 1;
+            base.NameG = 1;
+            base.NameB = .3f;
+            base.Texture = "ItemGold";
+        }
+    }
+
     public class Potion : Item
     {
         PotionType potionType;

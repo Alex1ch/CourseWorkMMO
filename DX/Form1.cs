@@ -14,6 +14,7 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Net;
+using System.Diagnostics;
 
 namespace DX
 {
@@ -28,7 +29,7 @@ namespace DX
 
         Dictionary<string, int> Textures;
         Dictionary<int, Enemy> EnemyList;
-        List<Player> PlayersList=new List<Player>();
+        Dictionary<string,Player> PlayersList=new Dictionary<string, Player>();
         List<Item> DropList;
         List<Player> AllPlayers;
         List<NPC> NPCList;
@@ -219,10 +220,12 @@ namespace DX
 
 
             //Отрисовка меню
+            //Инвентарь
             if (InvMenu)
             {
+                string quantitystr="";
                 Gl.glColor3f(.3f, .15f, 0);
-                Draw2DText(1,2,-3,4,7,Textures["Menu"]);
+                Draw2DText(1,2,-3.5f,4,7,Textures["Menu"]);
                 Gl.glLoadIdentity();
                 DrawStringCent(1,5, 8.25f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, "Inventory", 1f, 1f, 1f, true);
                 for (int i = 0; i < player.Inventory.Size; i++) {
@@ -236,27 +239,46 @@ namespace DX
                                    7 - (i - i % player.Inventory.Width) / player.Inventory.Width * 3f / 4f,
                                    -3.5f, 3f / 4f, 3f / 4f,
                                    Textures[player.Inventory.Items[i].Texture]);
-                        if (player.Inventory.Items[i].Quantity > 1||true) {
-                            DrawString(2f + i % player.Inventory.Width * 3f / 4f,
-                                   7 - (i - i % player.Inventory.Width) / player.Inventory.Width * 3f / 4f,
-                                   -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, player.Inventory.Items[i].Quantity.ToString(),
-                                   1, 1, 1, true);
-                        }
                     }
                 }
-                int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
+
+                for (int i = 0; i < player.Inventory.Size; i++)
+                {
+                    Gl.glColor3f(1, 1, 1);
+                    if (player.Inventory.Items[i] != null) if (player.Inventory.Items[i].Quantity > 1 || true)
+                        {
+                            int quantity = player.Inventory.Items[i].Quantity;
+                            quantitystr = "";
+                            if (quantity > 10000 && quantity < 10000000)
+                            {
+                                quantitystr = (quantity / 1000).ToString() + "k";
+                            }
+                            else if (quantity > 10000000)
+                            {
+                                quantitystr = (quantity / 1000000).ToString() + "kk";
+                            }
+                            else quantitystr = quantity.ToString();
+                            DrawStringFromRight(1.5F+ 3f/4f+i % player.Inventory.Width * 3f / 4f ,
+                                   7 - (i - i % player.Inventory.Width) / player.Inventory.Width * 3f / 4f,
+                                   -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, quantitystr,
+                                   1, 1, 1, true);
+                        }
+                }
+
+                    int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
                 int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
                 if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height && player.Inventory.Items[Y*player.Inventory.Width+X]!=null)
                 {
                     
-                    float Width = Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_18, player.Inventory.Items[Y * player.Inventory.Width + X].Name) * ScaleW
-                        >= Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_12, player.Inventory.Items[Y * player.Inventory.Width + X].Desc) * ScaleW ?
+                    float Width = Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_18, player.Inventory.Items[Y * player.Inventory.Width + X].Name ) * ScaleW
+                        >= Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_12, player.Inventory.Items[Y * player.Inventory.Width + X].Desc + "\n\nQuantity:" + player.Inventory.Items[Y * player.Inventory.Width + X].Quantity.ToString()) * ScaleW ?
                         Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_18, player.Inventory.Items[Y * player.Inventory.Width + X].Name) * ScaleW:
-                        Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_12, player.Inventory.Items[Y * player.Inventory.Width + X].Desc) * ScaleW;
+                        Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_12, player.Inventory.Items[Y * player.Inventory.Width + X].Desc + "\n\nQuantity:" + player.Inventory.Items[Y * player.Inventory.Width + X].Quantity.ToString()) * ScaleW;
                     float Height = Glut.glutBitmapHeight(Glut.GLUT_BITMAP_HELVETICA_12) * ScaleH;
                     int lines = 1;
-                    for (int i = 0; i < player.Inventory.Items[Y * player.Inventory.Width + X].Desc.Length; i++) {
-                        if (player.Inventory.Items[Y * player.Inventory.Width + X].Desc[i] == '\n') lines++;
+                    string outputdesc = player.Inventory.Items[Y * player.Inventory.Width + X].Desc + "\n\nQuantity:" + player.Inventory.Items[Y * player.Inventory.Width + X].Quantity.ToString();
+                    for (int i = 0; i < outputdesc.Length; i++) {
+                        if (outputdesc[i] == '\n') lines++;
                     }
                     Gl.glColor4f(.3f, .15f, 0,1);
                     Draw2DText(MouseOnMatrixX+.5f,MouseOnMatrixY-Height*lines-.4f,-4.5f,Width+.2f, Height*lines + .4f,Textures["DescBG"]);
@@ -275,7 +297,7 @@ namespace DX
                         MouseOnMatrixY - .3f-Height,
                         -5,
                         Glut.GLUT_BITMAP_HELVETICA_12,
-                        player.Inventory.Items[Y * player.Inventory.Width + X].Desc,.8f,.8f,.8f,
+                        player.Inventory.Items[Y * player.Inventory.Width + X].Desc+"\n\nQuantity:" + player.Inventory.Items[Y * player.Inventory.Width + X].Quantity.ToString(), .8f,.8f,.8f,
                         true
                         );
                 }
@@ -286,7 +308,7 @@ namespace DX
                 float TextCursor=0;
                 float Height;
                 Gl.glColor3f(.3f, .15f, 0);
-                Draw2DText(11,2,-3,4,7,Textures["Menu"]);
+                Draw2DText(11,2,-3.5f,4,7,Textures["Menu"]);
                 Gl.glLoadIdentity();
                 DrawStringCent(11, 15, 8.25f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, "Quests", 1f, 1f, 1f, true);
                 foreach (Quest quest in player.Quests) {
@@ -307,15 +329,33 @@ namespace DX
             }
 
             if (player.DialogMenu) {
-                if (!player.Trade)
+                if (!player.LastNPC.Trade)
                 {
                     Gl.glColor3f(.3f, .15f, 0);
-                    Draw2DText(5.5f, .5f, -3, 5, 2.5f, Textures["Menu"]);
+                    Draw2DText(5.5f, .5f, -3.5f, 5, 2.5f, Textures["Menu"]);
+                    DrawString(5.75f, 2.65f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, player.LastNPC.Name+":\n"+player.LastNPC.DialogMenuText, 1f, 1f, 1f, true);
                     Gl.glLoadIdentity();
-                    DrawString(6, 2.5f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, player.DialogMenuText, 1f, 1f, 1f, true);
                 }
-                else {
-
+                else
+                {
+                    Gl.glColor3f(.3f, .15f, 0);
+                    Draw2DText(5.5f, .5f, -3.5f, 5, 4.5f, Textures["Menu"]);
+                    for (int i = 0; i < player.LastNPC.Goods.Length;i++)
+                    {
+                        Gl.glColor3f(1, 1, 1);
+                        Draw2DText(5.75f+(i%6)*3f/4f,
+                            4f - (i/6)*3f/4f,
+                            -3.5f,
+                            3f/4f,3f/4f,Textures["ItemBG"]);
+                        Draw2DText(5.75f + (i % 6) * 3f / 4f,
+                            4f - (i / 6) * 3f / 4f,
+                            -3.5f,
+                            3f / 4f, 3f / 4f, Textures[player.LastNPC.Goods[i].Texture]);
+                        DrawString(5.75f + (i % 6) * 3f / 4f,
+                            4f - (i / 6) * 3f / 4f,
+                            -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, player.LastNPC.Prices[i].ToString(), 1, 1f, .0f, true);
+                    }
+                    DrawString(5.75f,.75f,-3.51f,Glut.GLUT_BITMAP_HELVETICA_12,"2.Exit",1,1,1,true);
                 }
             }
 
@@ -385,7 +425,7 @@ namespace DX
                         if (map[i, j] == 1) Draw2DText(i, j, 0, 1f, 1f, Textures["Ice"]);
                         if (map[i, j] == 2) Draw2DText(i, j, 0, 1f, 1f, Textures["Sand"]);
                         if (map[i, j] == 3) Draw2DText(i, j, 0, 1f, 1f, Textures["Ground"]);
-                        if (map[i, j] == 4) Draw2DText(i, j, OnScreenYtoZ(j-1), 1f, 1f, Textures["StWall"]);
+                        if (map[i, j] == 4) Draw2DText(i, j, 0, 1f, 1f, Textures["StWall"]);
                         if (map[i, j] == 5) Draw2DText(i, j, -2.1f, 1f, 1f, Textures["StBlack"]);
                         if (map[i, j] == 6) Draw2DText(i, j, 0, 1f, 1f, Textures["StFloor"]);
                         if (map[i, j] == 7) Draw2DText(i, j, 0, 1f, 1f, Textures["WFloor"]);
@@ -421,10 +461,9 @@ namespace DX
             {
 
                 player = new Player(63, 60, textBox1.Text);
-
                 AllPlayers = new List<Player>();
                 AllPlayers.Add(player);
-                
+                PlayersList.Add(player.Name,player);
 
                 EnemyList = new Dictionary<int, Enemy>();
 
@@ -451,29 +490,35 @@ namespace DX
 
                 NPCList.Add(new DX.NPC(76, 63,Name, new string[] { "IdleD" }, new NPCClickFuncDel(NPCDelegates.AndreClickFunc), new NPCCalcAnimDel(NPCDelegates.AndreCalcAnim), new NPCExMarkDel(NPCDelegates.AndreExMark),dialogs));
 
+                object[,] Goodies = new object[,] { { new Potion(PotionType.Health, 1),25 }, { new Potion(PotionType.Energy, 1), 50 }, { new Potion(PotionType.Energy, 1), 50 }
+                , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 }
+                , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 }
+                , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 }
+                , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } };
                 dialogs = ReadDialog(out Name, SR);
-                NPCList.Add(new DX.NPC(78,60,Name, new string[] { "IdleL" },new NPCClickFuncDel(NPCDelegates.VendorClickFunc),new NPCCalcAnimDel(NPCDelegates.VendorCalcAnim),new NPCExMarkDel(NPCDelegates.VendorExMark),dialogs));
+                NPCList.Add(new DX.NPC(78,60,Name, new string[] { "IdleL" },new NPCClickFuncDel(NPCDelegates.VendorClickFunc),new NPCCalcAnimDel(NPCDelegates.VendorCalcAnim),new NPCExMarkDel(NPCDelegates.VendorExMark),dialogs,Goodies));
 
                 Item.Drop = DropList;
 
-                player.Inventory.Add(new Potion(PotionType.Health, 2));
+                player.Inventory.Add(new Potion(PotionType.Health, 3));
+                player.Inventory.Add(new Gold(int.MaxValue));
 
                 RenderTimer.Start();
                 LogicTimer.Start();
                 QuestCheckTimer.Start();
 
-                Reader=new Task(() => {
-                    while (true) {
+                /*Reader=new Task(() => {
+                    while (connect!=null) {
                         if (this.IsDisposed) {
                             connect.End_Session();
+                            Process.GetCurrentProcess().Kill();
                             return;
                         }
-                        //connect.Recv_Msg;
                     }
 
-                });
+                });*/
 
-                Reader.Start();
+                //Reader.Start();
 
                 LoginScreenRenderTimer.Stop();
             }
@@ -493,7 +538,8 @@ namespace DX
             if (player.DOWN) Direction = 4;
             if (player.UP) Direction = 2;
 
-             connect.SetXYD(player.X,player.Y,Direction);
+            /*if(connect!=null)*/
+            connect.SetXYD(player.X, player.Y,player.Rotation,player.Hp, Direction) ;
 
             foreach (KeyValuePair<int, Enemy> enemy in GetNearbyEnemies(player.X, player.Y, EnemyList))
             {
@@ -504,6 +550,10 @@ namespace DX
                     enemy.Value.DropFunc(DropList, RNG);
                     EnemyList.Remove(enemy.Key);
                 }
+            }
+            textBox3.Text = "";
+            foreach (KeyValuePair<string,Player> pair in PlayersList) {
+//textBox3.Text += pair.Value.Name;
             }
         }
 
@@ -582,6 +632,7 @@ namespace DX
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            connect = new NetGame(4446, ref PlayersList); //Server ip, log port, game port, my port
             RNG = new Random(Environment.TickCount);
 
             ScrW = 16;
@@ -668,6 +719,7 @@ namespace DX
             Textures.Add("ItemHP0", LoadTexture("Tex//Items//Potions//HP0.png"));
             Textures.Add("ItemSpeed0", LoadTexture("Tex//Items//Potions//Speed0.png"));
             Textures.Add("ItemEnergy0", LoadTexture("Tex//Items//Potions//Energy0.png"));
+            Textures.Add("ItemGold", LoadTexture("Tex//Items//Gold.png"));
 
 
             //enemys
@@ -726,6 +778,7 @@ namespace DX
             Textures.Add("HeroAtkD1", LoadTexture("Tex//Attack//down_1.png"));
 
 
+
             LoginScreenRenderTimer.Start();
             // активация таймера, вызывающего функцию для визуализации 
         }
@@ -754,16 +807,39 @@ namespace DX
                 }
                 if (e.Button == MouseButtons.Right)
                 {
-                    int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
-                    int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
-                    if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height) player.Inventory.Activate((int)Y * player.Inventory.Width + (int)X);
+                    if (InvMenu)
+                    {
+                        int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
+                        int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
+                        if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height)
+                        {
+                            player.Inventory.Activate((int)Y * player.Inventory.Width + (int)X);
+                            return;
+                        }
+                    }
+                    if (player.DialogMenu&&player.LastNPC.Trade)
+                    {
+                        int X = (int)((MouseOnMatrixX - 5.75f) * 4f / 3f);
+                        int Y = (int)((4f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
+
+                        if (X >= 0 && X < 6 && Y >= 0 && Y < player.LastNPC.Goods.Length/6)
+                        {
+                            if (player.LastNPC.Goods != null)
+                                player.LastNPC.Sell(player, X + Y * 6);
+                            return;
+                        }
+                    }
                     MousePosOnMap();
                     foreach (NPC npc in GetNearbyNPCs(player.X, player.Y, NPCList))
                     {
                         if (MouseOnMapX > npc.X - .5f && MouseOnMapX < npc.X + .5f && MouseOnMapY > npc.Y && MouseOnMapY < npc.Y + 1)
                         {
-                            player.Trade = false;
-                            npc.ClickFunc(player, npc);
+                            if (!player.DialogMenu)
+                            {
+                                player.LastNPC = npc;
+                                player.LastNPC.Trade = false;
+                                npc.ClickFunc(player, npc);
+                            }
                         }
                     }
                 }
@@ -807,7 +883,9 @@ namespace DX
                     }
                 }
                 if (e.KeyCode == Keys.J) QuestMenu = !QuestMenu;
-                if (e.KeyCode == Keys.I) InvMenu = !InvMenu;
+                if (e.KeyCode == Keys.I) {
+                    Console.Write("Инвентарь открылся ууууух!");
+                    InvMenu = !InvMenu; }
                 if (e.KeyCode == Keys.Escape) { InvMenu = false; QuestMenu = false; }
             }
         }
@@ -898,6 +976,22 @@ namespace DX
             Gl.glEnable(Gl.GL_TEXTURE_2D);
         }
 
+        void DrawStringFromRight(float X, float Y, float Z, IntPtr font, string text, float R, float G, float B, bool shadow)
+        {
+            X -= Glut.glutBitmapLength(font, text) * ScrW / AnT.Width;
+            Gl.glDisable(Gl.GL_TEXTURE_2D);
+            if (shadow)
+            {
+                Gl.glColor3f(0, 0, 0);
+                Gl.glRasterPos3f(X + .04f, Y + .02f, Z);
+                Glut.glutBitmapString(font, text);
+            }
+            Gl.glColor3f(R, G, B);
+            Gl.glRasterPos3f(X, Y, Z);
+            Glut.glutBitmapString(font, text);
+            Gl.glEnable(Gl.GL_TEXTURE_2D);
+        }
+
 
         float OnScreenYtoZ(float Y) {
             return -.15f-ScrH/6 + (Y - player.Y + ScrH / 2)/6;
@@ -929,50 +1023,55 @@ namespace DX
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (textBox1.Text == "Offline")
-            {
-                textBox1.Enabled = false;
-                textBox2.Enabled = false;
-                button1.Enabled = false;
-                textBox1.Visible = false;
-                textBox2.Visible = false;
-                button1.Visible = false;
-                LoginScreen = false;
-            }
+                if (textBox1.Text == "Offline")
+                {
+                    textBox1.Enabled = false;
+                    textBox2.Enabled = false;
+                    button1.Enabled = false;
+                    textBox1.Visible = false;
+                    textBox2.Visible = false;
+                    button1.Visible = false;
+                    LoginScreen = false;
+                }
 
-            IPAddress useless;
-            string ip;
-            string char_name;
-            if (textBox1.Text != "") char_name = textBox1.Text;  else { 
-                LoginScreenErr = "Empty Name"; return;
-            }
-            
-            if (textBox2.Text != "") ip = textBox2.Text;
-            else
-            {
-                LoginScreenErr = "Empty IP"; return;
-            }
+                IPAddress useless;
+                string ip;
+                string char_name;
+                if (textBox1.Text != "") char_name = textBox1.Text;
+                else
+                {
+                    LoginScreenErr = "Empty Name"; return;
+                }
 
-            if (!IPAddress.TryParse(ip, out useless))
-            {
-                LoginScreenErr = "Wrong IP Format"; return;
-            };
+                if (textBox2.Text != "") ip = textBox2.Text;
+                else
+                {
+                    LoginScreenErr = "Empty IP"; return;
+                }
 
-            connect = new NetGame(ip, 4445, 4444, 4446); //Server ip, log port, game port, my port
-            if (connect.LogNstart_Session(char_name))
-            {
-                textBox1.Enabled = false;
-                textBox2.Enabled = false;
-                button1.Enabled = false;
-                textBox1.Visible = false;
-                textBox2.Visible = false;
-                button1.Visible = false;
-                LoginScreen = false;
+                if (!IPAddress.TryParse(ip, out useless))
+                {
+                    LoginScreenErr = "Wrong IP Format"; return;
+                };
 
-            }
-            else {
-                LoginScreenErr = "Can't connect to server";
-                return; }
+                connect.Set_Addr(ip, 4445, 4444);
+                if (connect.IsConnectable())
+                {
+                    connect.LogNstart_Session(char_name);
+                    textBox1.Enabled = false;
+                    textBox2.Enabled = false;
+                    button1.Enabled = false;
+                    textBox1.Visible = false;
+                    textBox2.Visible = false;
+                    button1.Visible = false;
+                    LoginScreen = false;
+
+                }
+                else
+                {
+                    LoginScreenErr = "Can't connect to server";
+                    return;
+                }
         }
 
         List<NPC> GetNearbyNPCs(float playerX, float playerY, List<NPC> NPCs)

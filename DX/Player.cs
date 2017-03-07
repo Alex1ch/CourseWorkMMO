@@ -9,6 +9,9 @@ namespace DX
 {
     public class Player
     {
+        public NPC LastNPC;
+        
+
         int id;
         float x=32, y=32;
         float rotation;
@@ -24,8 +27,6 @@ namespace DX
 
         bool up = false;
         bool dialogMenu=false;
-        bool trade = false;
-        string dialogMenuText = "";
         bool down = false;
         bool left = false;
         bool right = false;
@@ -67,8 +68,7 @@ namespace DX
             x = pX; y = pY;
             inventory = new Inventory(this);
         }
-
-
+        
         internal void CheckQuests()
         {
             foreach (Quest quest in quests) {
@@ -554,18 +554,7 @@ namespace DX
             }
         }
 
-        public string DialogMenuText
-        {
-            get
-            {
-                return dialogMenuText;
-            }
 
-            set
-            {
-                dialogMenuText = value;
-            }
-        }
 
         public string Name
         {
@@ -580,18 +569,6 @@ namespace DX
             }
         }
 
-        public bool Trade
-        {
-            get
-            {
-                return trade;
-            }
-
-            set
-            {
-                trade = value;
-            }
-        }
 
         public int Id
         {

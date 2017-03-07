@@ -127,6 +127,8 @@ class Ghost : DX.Enemy {
     public override void DropFunc(List<DX.Item> DropList, Random RNG) {
         int pool = RNG.Next(100);
         if (pool < 13) DropList.Add(new DX.Potion(DX.PotionType.Health,RNG.Next(1,3),X,Y));
+        pool = RNG.Next(100);
+        if (pool < 13) DropList.Add(new DX.Gold(X, Y, RNG.Next(30, 100)));
     }
 
     public override void WorkCycle(List<DX.Player> Player) {
