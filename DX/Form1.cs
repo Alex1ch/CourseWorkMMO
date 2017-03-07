@@ -553,7 +553,7 @@ namespace DX
             }
             textBox3.Text = "";
             foreach (KeyValuePair<string,Player> pair in PlayersList) {
-//textBox3.Text += pair.Value.Name;
+                textBox3.Text += pair.Value.Name;
             }
         }
 

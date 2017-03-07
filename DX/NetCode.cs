@@ -44,8 +44,8 @@ namespace DX
             Array.Copy(msg, 0, x, 0, 4);
             Array.Copy(msg, 4, y, 0, 4);
             Array.Copy(msg, 8, r, 0, 4);
-            Array.Copy(msg, 12, d, 0, 4);
-            Array.Copy(msg, 13, hp, 0, 1);
+            Array.Copy(msg, 12, d, 0, 1);
+            Array.Copy(msg, 13, hp, 0, 4);
 
             // вытаскиваю имя перса из пакета
             string name = GetName17b(msg);
@@ -105,8 +105,8 @@ namespace DX
             Array.Copy(msg, 0, x, 0, 4);
             Array.Copy(msg, 4, y, 0, 4);
             Array.Copy(msg, 8, r, 0, 4);
-            Array.Copy(msg, 12, d, 0, 4);
-            Array.Copy(msg, 13, hp, 0, 1);
+            Array.Copy(msg, 12, d, 0, 1);
+            Array.Copy(msg, 13, hp, 0, 4);
 
             // вытаскиваю имя перса из пакета
             string name = GetName17b(msg);
@@ -212,8 +212,8 @@ namespace DX
         Array.Copy(msg, 0, x, 0, 4);
         Array.Copy(msg, 4, y, 0, 4);
         Array.Copy(msg, 8, r, 0, 4);
-        Array.Copy(msg, 12, d, 0, 4);
-        Array.Copy(msg, 13, hp, 0, 1);
+        Array.Copy(msg, 12, d, 0, 1);
+        Array.Copy(msg, 13, hp, 0, 4);
             
 
         if (Characters.ContainsKey(name))
