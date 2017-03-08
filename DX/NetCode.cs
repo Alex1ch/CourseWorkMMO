@@ -12,6 +12,21 @@ namespace DX
 {
     class Cons
     {
+        public static int HaveEntry(Player[] players,string name){
+            for (int i = 1; i < players.Length; i++) {
+                if(players[i]!=null)
+                if (players[i].Name == name) return i;
+            }
+            return -1;
+        }
+
+        public static int GetNull(Player[] players) {
+            for (int i = 0; i < players.Length; i++) {
+                if (players[i] == null) return i;
+            }
+            return -1;
+        }
+
         //Взять данные с пакета (только где в дате только имя)
         public static string GetData(byte[] data)
         {
@@ -94,57 +109,59 @@ namespace DX
         }
 
         //Заносим в координаты и имена других персов которые нам передали
-        public static void Parse_CharsXYD(ref Dictionary<string, Player> Characters, byte[] msg)
+        public static void Parse_CharsXYD(ref Player[] players, byte[] msg)
         {
             byte[] x = new byte[4];
             byte[] y = new byte[4];
             byte[] r = new byte[4];
             byte[] hp = new byte[4];
-            byte[] d = new byte[1];
+            byte d = 0;
 
             Array.Copy(msg, 0, x, 0, 4);
             Array.Copy(msg, 4, y, 0, 4);
             Array.Copy(msg, 8, r, 0, 4);
-            Array.Copy(msg, 12, d, 0, 1);
+            d = msg[12];
             Array.Copy(msg, 13, hp, 0, 4);
 
             // вытаскиваю имя перса из пакета
             string name = GetName17b(msg);
 
-            if (Characters.ContainsKey(name))
+            int index = HaveEntry(players, name);
+
+            if (index==-1)
             {
                 Player player = new Player(BitConverter.ToSingle(x, 0), BitConverter.ToSingle(y, 0), name);
-                Characters[name] = player;
+                players[GetNull(players)] = player;
                 player.Rotation = BitConverter.ToSingle(r, 0);
-                if (d[0] == 0)
+                if (d == 0)
                 {
                     player.LEFT = false;
                     player.UP = false;
                     player.RIGHT = false;
                     player.DOWN = false;
                 }
-                if (d[0] == 1)
+                if (d == 1)
                 {
                     player.RIGHT = true;
                     player.DOWN = false;
                     player.LEFT = false;
                     player.UP = false;
                 }
-                if (d[0] == 2)
+                if (d == 2)
                 {
                     player.RIGHT = false;
                     player.DOWN = false;
                     player.LEFT = false;
                     player.UP = true;
                 }
-                if (d[0] == 3)
+                if (d == 3)
                 {
                     player.RIGHT = false;
                     player.DOWN = false;
                     player.LEFT = true;
                     player.UP = false;
                 }
-                if (d[0] == 4)
+                if (d == 4)
                 {
                     player.RIGHT = false;
                     player.DOWN = true;
@@ -156,38 +173,39 @@ namespace DX
             }
             else
             {
-                Characters.Add(name, new Player(BitConverter.ToSingle(x, 0), BitConverter.ToSingle(y, 0), name));
-                Player player = Characters[name];
+                Player player = players[index];
+                player.X = BitConverter.ToSingle(x, 0) ;
+                player.Y = BitConverter.ToSingle(y, 0);
                 player.Rotation = BitConverter.ToSingle(r, 0);
-                if (d[0] == 0)
+                if (d == 0)
                 {
                     player.LEFT = false;
                     player.UP = false;
                     player.RIGHT = false;
                     player.DOWN = false;
                 }
-                if (d[0] == 1)
+                if (d == 1)
                 {
                     player.RIGHT = true;
                     player.DOWN = false;
                     player.LEFT = false;
                     player.UP = false;
                 }
-                if (d[0] == 2)
+                if (d == 2)
                 {
                     player.RIGHT = false;
                     player.DOWN = false;
                     player.LEFT = false;
                     player.UP = true;
                 }
-                if (d[0] == 3)
+                if (d == 3)
                 {
                     player.RIGHT = false;
                     player.DOWN = false;
                     player.LEFT = true;
                     player.UP = false;
                 }
-                if (d[0] == 4)
+                if (d == 4)
                 {
                     player.RIGHT = false;
                     player.DOWN = true;
@@ -199,115 +217,12 @@ namespace DX
         
         
         }
-
-
-        public static void Parse_CharsXYD(ref Dictionary<string, Player> Characters, string name, byte[] msg)
-    {
-        byte[] x = new byte[4];
-        byte[] y = new byte[4];
-        byte[] r = new byte[4];
-        byte[] hp = new byte[4];
-        byte[] d = new byte[1];
-
-        Array.Copy(msg, 0, x, 0, 4);
-        Array.Copy(msg, 4, y, 0, 4);
-        Array.Copy(msg, 8, r, 0, 4);
-        Array.Copy(msg, 12, d, 0, 1);
-        Array.Copy(msg, 13, hp, 0, 4);
-            
-
-        if (Characters.ContainsKey(name))
-        {
-            Player player = new Player(BitConverter.ToSingle(x, 0), BitConverter.ToSingle(y, 0),name);
-            Characters[name] = player;
-            player.Rotation = BitConverter.ToSingle(r, 0);
-            if (d[0] == 0)
-            {
-                player.LEFT = false;
-                player.UP = false;
-                player.RIGHT = false;
-                player.DOWN = false;
-            }
-            if (d[0] == 1)
-            {
-                player.RIGHT = true;
-                player.DOWN = false;
-                player.LEFT = false;
-                player.UP = false;
-            }
-            if (d[0] == 2)
-            {
-                player.RIGHT = false;
-                player.DOWN = false;
-                player.LEFT = false;
-                player.UP = true;
-            }
-            if (d[0] == 3)
-            {
-                player.RIGHT = false;
-                player.DOWN = false;
-                player.LEFT = true;
-                player.UP = false;
-            }
-            if (d[0] == 4)
-            {
-                player.RIGHT = false;
-                player.DOWN = true;
-                player.LEFT = false;
-                player.UP = false;
-            }
-            player.Hp = BitConverter.ToSingle(hp, 0);
-
-        }
-        else
-        {
-            Characters.Add(name, new Player(BitConverter.ToSingle(x, 0), BitConverter.ToSingle(y, 0), name));
-            Player player = Characters[name];
-            player.Rotation = BitConverter.ToSingle(r, 0);
-            if (d[0] == 0)
-            {
-                player.LEFT = false;
-                player.UP = false;
-                player.RIGHT = false;
-                player.DOWN = false;
-            }
-            if (d[0] == 1)
-            {
-                player.RIGHT = true;
-                player.DOWN = false;
-                player.LEFT = false;
-                player.UP = false;
-            }
-            if (d[0] == 2)
-            {
-                player.RIGHT = false;
-                player.DOWN = false;
-                player.LEFT = false;
-                player.UP = true;
-            }
-            if (d[0] == 3)
-            {
-                player.RIGHT = false;
-                player.DOWN = false;
-                player.LEFT = true;
-                player.UP = false;
-            }
-            if (d[0] == 4)
-            {
-                player.RIGHT = false;
-                player.DOWN = true;
-                player.LEFT = false;
-                player.UP = false;
-            }
-            player.Hp = BitConverter.ToSingle(hp, 0);
-        }
-    }
     }
 
 
     class NetGame
     {
-        Dictionary<string,Player> Players;
+        Player[] Players;
         static UdpClient client_udp;
         static IPEndPoint login_addr;
         static IPEndPoint game_addr;
@@ -410,7 +325,7 @@ namespace DX
         }
 
         //Только с использованием Set_Addr, Расчитано на много попыток подключения (под разными имеми и аддресами)
-        public NetGame(int My_Port,ref Dictionary<string,Player> dict)
+        public NetGame(int My_Port,ref Player[] dict)
         {
             Players = dict;
             my_port = My_Port;
@@ -618,7 +533,7 @@ namespace DX
                                 string name = Cons.GetName17b(msg);
 
                                 //Если в пакете есть имя перса клиента
-                                if (name == char_name) ;// Cons.Parse_MyXYD(Players[name], msg);
+                                if (name == char_name)  Cons.Parse_MyXYD(Players[0], msg);
                                 else { Cons.Parse_CharsXYD(ref Players, msg); }
                                 break;
 

@@ -29,7 +29,7 @@ namespace DX
 
         Dictionary<string, int> Textures;
         Dictionary<int, Enemy> EnemyList;
-        Dictionary<string,Player> PlayersList=new Dictionary<string, Player>();
+        Player[] PlayersList=new Player[1000];
         List<Item> DropList;
         List<Player> AllPlayers;
         List<NPC> NPCList;
@@ -122,53 +122,16 @@ namespace DX
 
             if (player.Alive)
             {
-                
-                if (!player.LEFT && !player.RIGHT && !player.UP && !player.DOWN && !player.Attack)
-                {
-                    player.ResetAnim();
-                    if (player.Rotation < 45 && player.Rotation >= -45) Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["IdleR"]);
-                    if (player.Rotation >= 45 && player.Rotation < 135) Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["IdleU"]);
-                    if (player.Rotation >= 135 || player.Rotation < -135) Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["IdleL"]);
-                    if (player.Rotation >= -135 && player.Rotation < -45) Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["IdleD"]);
-                }
 
+                Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures[player.Texture]);
 
-                if (player.Attack)
-                {
-                    if (player.Rotation < 45 && player.Rotation >= -45) Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroAtkR" + player.AttackAtState.ToString()]);
-                    if (player.Rotation >= 45 && player.Rotation < 135) Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroAtkU" + player.AttackAtState.ToString()]);
-                    if (player.Rotation >= 135 || player.Rotation < -135) Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroAtkL" + player.AttackAtState.ToString()]);
-                    if (player.Rotation >= -135 && player.Rotation < -45) Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroAtkD" + player.AttackAtState.ToString()]);
-                }
-                else
-                {
-
-                    if (player.LEFT)
-                    {
-                        Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroLEFT" + player.RunAtState.ToString()]);
-                    }
-                    if (player.UP)
-                    {
-                        Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroUP" + player.RunAtState.ToString()]);
-                    }
-                    if (player.DOWN)
-                    {
-                        Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroDOWN" + player.RunAtState.ToString()]);
-                    }
-                    if (player.RIGHT)
-                    {
-                        Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroRIGHT" + player.RunAtState.ToString()]);
-                    }
-                }
-
-            }else
+            }
+            else
             {
                 Gl.glRotatef(90f,0,0,1);
-                Draw2DTextCent(0, .60f, -1, 1.5f, 1.5f, Textures["IdleR"]);
+                Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["IdleR"]);
             }
             Gl.glPopMatrix();
-
-
 
             Gl.glPushMatrix();
             Gl.glTranslatef(-player.X + ScrW / 2, -player.Y + ScrH / 2, 0);
@@ -176,6 +139,34 @@ namespace DX
 
             //
             //
+
+            Player[] Players = GetNearbyPlayers(player.X, player.Y, PlayersList);
+
+            for(int i=1;i<PlayersList.Length;i++)
+            {
+                if (PlayersList[i] == null) continue;
+                PlayersList[i].CalcAnim();
+                if (PlayersList[i].Alive)
+                {
+                    Console.WriteLine(PlayersList[i].Name + " " + PlayersList[i].X + " " + PlayersList[i].Y);
+                    DrawStringCent(PlayersList[i].X - 2, PlayersList[i].X + 2, PlayersList[i].Y + 1.3f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, PlayersList[i].Name, 1, 1, 1, true);
+                    Gl.glColor3f(0f, 0f, 0f);
+                    Draw2DText(PlayersList[i].X - .45f, PlayersList[i].Y + 1.1f, -3, .9f, .15f, Textures["HPBAR"]);
+                    Gl.glColor3f(1f, 0f, 0f);
+                    Draw2DText(PlayersList[i].X - .45f, PlayersList[i].Y + 1.1f, -3, .9f / PlayersList[i].MaxHp * PlayersList[i].Hp, .15f, Textures["HPBAR"]);
+                    Gl.glColor3f(1, 1, 1);
+                    Draw2DTextCent(PlayersList[i].X, PlayersList[i].Y+0.6f, OnScreenYtoZ(PlayersList[i].Y), 1.5f, 1.5f, Textures[PlayersList[i].Texture]);
+
+                }
+                else
+                {
+                    Gl.glRotatef(90f, 0, 0, 1);
+                    DrawStringCent(PlayersList[i].X - 2, PlayersList[i].X + 2, PlayersList[i].Y + .9f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, PlayersList[i].Name, 1, 1, 1, true);
+                    Draw2DTextCent(PlayersList[i].X, PlayersList[i].Y+0.6f, OnScreenYtoZ(PlayersList[i].Y), 1.5f, 1.5f, Textures["IdleR"]);
+                }
+            }
+
+
 
             //отрисовка дропа
             foreach (Item item in GetNearbyItems(player.X, player.Y, DropList))
@@ -463,7 +454,7 @@ namespace DX
                 player = new Player(63, 60, textBox1.Text);
                 AllPlayers = new List<Player>();
                 AllPlayers.Add(player);
-                PlayersList.Add(player.Name,player);
+                PlayersList[0] = player;
 
                 EnemyList = new Dictionary<int, Enemy>();
 
@@ -539,7 +530,7 @@ namespace DX
             if (player.UP) Direction = 2;
 
             /*if(connect!=null)*/
-            connect.SetXYD(player.X, player.Y,player.Rotation,player.Hp, Direction) ;
+            connect.SetXYD(player.X, player.Y,player.Rotation,player.Hp, Direction);
 
             foreach (KeyValuePair<int, Enemy> enemy in GetNearbyEnemies(player.X, player.Y, EnemyList))
             {
@@ -552,9 +543,6 @@ namespace DX
                 }
             }
             textBox3.Text = "";
-            foreach (KeyValuePair<string,Player> pair in PlayersList) {
-                textBox3.Text += pair.Value.Name;
-            }
         }
 
 
@@ -1082,6 +1070,27 @@ namespace DX
                 if (Math.Sqrt((playerX - enemy.X) * (playerX - enemy.X) + (playerY - enemy.Y) * (playerY - enemy.Y)) < 11f)
                 {
                     output.Add(enemy);
+                }
+            }
+            return output;
+        }
+
+
+        Player[] GetNearbyPlayers(float playerX, float playerY, Player[] Players)
+        {
+            var output = new Player[Players.Length];
+            int j = 0;
+
+            output[0] = Players[0];
+
+            for(int i = 1; i < Players.Length; i++) {
+                if (Players[i] != null)
+                {
+                    if (Math.Sqrt((playerX - Players[i].X) * (playerX - Players[i].X) + (playerY - Players[i].Y) * (playerY - Players[i].Y)) < 11f)
+                    {
+                        output[j] = Players[i];
+                    }
+                    j++;
                 }
             }
             return output;

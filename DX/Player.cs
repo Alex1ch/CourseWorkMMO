@@ -33,6 +33,8 @@ namespace DX
         bool attack = false;
         bool alive = true;
         float atkDmg = 28;
+
+        string texture;
         
         int frameskip = 0;
         int frameskiplimit;
@@ -116,6 +118,46 @@ namespace DX
                         frameskip = 0;
                     }
                     frameskip++;
+                }
+            }
+
+            Player player = this;
+
+            if (!player.LEFT && !player.RIGHT && !player.UP && !player.DOWN && !player.Attack)
+            {
+                player.ResetAnim();
+                if (player.Rotation < 45 && player.Rotation >= -45) texture = "IdleR";
+                if (player.Rotation >= 45 && player.Rotation < 135) texture = "IdleU";
+                if (player.Rotation >= 135 || player.Rotation < -135) texture = "IdleL";
+                if (player.Rotation >= -135 && player.Rotation < -45) texture = "IdleD";
+            }
+
+
+            if (player.Attack)
+            {
+                if (player.Rotation < 45 && player.Rotation >= -45) texture = "HeroAtkR" + player.AttackAtState.ToString();
+                if (player.Rotation >= 45 && player.Rotation < 135) texture = "HeroAtkU" + player.AttackAtState.ToString();
+                if (player.Rotation >= 135 || player.Rotation < -135) texture = "HeroAtkL" + player.AttackAtState.ToString();
+                if (player.Rotation >= -135 && player.Rotation < -45) texture = "HeroAtkD" + player.AttackAtState.ToString();
+            }
+            else
+            {
+
+                if (player.LEFT)
+                {
+                    texture = "HeroLEFT" + player.RunAtState.ToString();
+                }
+                if (player.UP)
+                {
+                    texture = "HeroUP" + player.RunAtState.ToString();
+                }
+                if (player.DOWN)
+                {
+                    texture = "HeroDOWN" + player.RunAtState.ToString();
+                }
+                if (player.RIGHT)
+                {
+                    texture = "HeroRIGHT" + player.RunAtState.ToString();
                 }
             }
         }
@@ -580,6 +622,19 @@ namespace DX
             set
             {
                 id = value;
+            }
+        }
+
+        public string Texture
+        {
+            get
+            {
+                return texture;
+            }
+
+            set
+            {
+                texture = value;
             }
         }
     }
