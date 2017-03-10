@@ -12,6 +12,16 @@ namespace DX
 
         Bitmap bitmap;
 
+        public int X
+        {
+            get { return bitmap.Width; }
+        }
+
+
+        public int Y
+        {
+            get { return bitmap.Height-1; }
+        }
 
         //Принимает путь к файлу карты
         public Map(string map_path)

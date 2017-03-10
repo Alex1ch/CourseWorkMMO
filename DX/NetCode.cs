@@ -10,20 +10,38 @@ using System.Threading.Tasks;
 
 namespace DX
 {
+    /*
+   1) В Parse_CharsXYD обьект нового игрока передается когда не все его параметры инициализированы
+   2) Менять направление на false сразу в свойствах класса игрока? 
+    */
     class Cons
     {
-        public static int HaveEntry(Player[] players,string name){
-            for (int i = 1; i < players.Length; i++) {
+        /// <summary>
+        /// Найти индекс персонажа с заданным именем в массиве, -1 если нет такого
+        /// </summary>
+        /// <param name="players"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static int HaveEntry(Player[] players, string name)
+        {
+            for (int i = 1; i < players.Length; i++)
+            {
                 if(players[i]!=null)
-                if (players[i].Name == name) return i;
+                    if (players[i].Name == name) return i;
             }
             return -1;
         }
 
-        public static int GetNull(Player[] players) {
-            for (int i = 0; i < players.Length; i++) {
+        /// <summary>
+        /// Найти пустое место в массиве персонажей, -1 если нет таких
+        /// </summary>
+        /// <param name="players"></param>
+        /// <returns></returns>
+        public static int GetNull(Player[] players)
+        {
+            for (int i = 0; i < players.Length; i++)
                 if (players[i] == null) return i;
-            }
+
             return -1;
         }
 
@@ -133,6 +151,7 @@ namespace DX
                 Player player = new Player(BitConverter.ToSingle(x, 0), BitConverter.ToSingle(y, 0), name);
                 players[GetNull(players)] = player;
                 player.Rotation = BitConverter.ToSingle(r, 0);
+
                 if (d == 0)
                 {
                     player.LEFT = false;
@@ -177,6 +196,7 @@ namespace DX
                 player.X = BitConverter.ToSingle(x, 0) ;
                 player.Y = BitConverter.ToSingle(y, 0);
                 player.Rotation = BitConverter.ToSingle(r, 0);
+
                 if (d == 0)
                 {
                     player.LEFT = false;
@@ -217,12 +237,25 @@ namespace DX
         
         
         }
+
+        public static bool DeletePlayer(ref Player[] players, string name)
+        {
+            int index = HaveEntry(players, name);
+
+            if (index == -1) return false;
+            else
+            {
+                players[index] = null;
+                return true;
+            }
+        }
     }
 
 
     class NetGame
     {
         Player[] Players;
+
         static UdpClient client_udp;
         static IPEndPoint login_addr;
         static IPEndPoint game_addr;
@@ -238,14 +271,6 @@ namespace DX
         static bool session_ON = false;       //Индикатор того запущена сессия с сервером или нет
         static bool available_port = false;   //Для обозначения того, что нашелся ли свободный порт для клиента
         static bool IsExit = false; //Происходит отключение или нет
-
-        //Для счета отправленных пакетов
-        static public int sentPackets = 0;
-        public int SentPackets { get { return sentPackets; } }
-
-        //Отправлено байт
-        private int sentBytes = 0;
-        public int SentBytes { get { return sentBytes; } }
 
         //Сколько раз неудалось подключиться
         static public int cfl = 0;
@@ -289,7 +314,7 @@ namespace DX
         }
 
         //Координаты других персов
-        static Dictionary<string, float[]> Characters = new Dictionary<string, float[]>(15);
+        /*static Dictionary<string, float[]> Characters = new Dictionary<string, float[]>(15);
         public Dictionary<string, float[]> Characters_XYD
         {
             get
@@ -297,38 +322,45 @@ namespace DX
                 if (Characters.Keys.Contains(char_name)) Characters.Remove(char_name);
                 return Characters;
             }
-        }
+        }*/
 
         //Координаты мобов
-        static Dictionary<string, float[]> Mobs = new Dictionary<string, float[]>(15);
+        /*static Dictionary<string, float[]> Mobs = new Dictionary<string, float[]>(15);
         public Dictionary<string, float[]> Mobs_XYD
         {
             get
             {
                 return Mobs;
             }
-        }
+        }*/
 
         //IP, Port
-        public NetGame(string IP, int Log_Port, int Game_Port, int My_Port)
+        public NetGame(string IP, int Log_Port, int Game_Port, int My_Port, ref Player[] dict)
         {
+            Players = dict;
             log_port = Log_Port;
             game_port = Game_Port;
             my_port = My_Port;
             ip = IP;
+
             //Ищем свободный порт
             if (Parse_Port()) available_port = true;
             Console.WriteLine("Connected to port: " + my_port);
+
             //Адреса логин и гейм серва
             login_addr = new IPEndPoint(IPAddress.Parse(ip), log_port);
             game_addr = new IPEndPoint(IPAddress.Parse(ip), game_port);
         }
 
         //Только с использованием Set_Addr, Расчитано на много попыток подключения (под разными имеми и аддресами)
-        public NetGame(int My_Port,ref Player[] dict)
+        public NetGame(int My_Port, ref Player[] dict)
         {
             Players = dict;
             my_port = My_Port;
+
+            //Ищем свободный порт
+            if (Parse_Port()) available_port = true;
+            Console.WriteLine("Connected to port: " + my_port);
         }
 
         //Поменять аддрес для подключения
@@ -337,10 +369,7 @@ namespace DX
             log_port = Log_Port;
             game_port = Game_Port;
             ip = IP;
-
-            //Ищем свободный порт
-            if (Parse_Port()) available_port = true;
-            Console.WriteLine("Connected to port: " + my_port);
+       
             //Адреса логин и гейм серва
             login_addr = new IPEndPoint(IPAddress.Parse(ip), log_port);
             game_addr = new IPEndPoint(IPAddress.Parse(ip), game_port);
@@ -359,9 +388,7 @@ namespace DX
                     available_port = true;
                     return true;
                 }
-                catch (Exception e)
-                { //Console.WriteLine(e.Message); 
-                }
+                catch (Exception e){}
             }
             return false;
         }
@@ -386,18 +413,16 @@ namespace DX
             catch (Exception e)
             {
                 listen = false;
-                Console.WriteLine("Connection: " + e.Message);
-                //listen = false;
+                Console.WriteLine("[Connection check] Catch: " + e.Message);
                 Send(100, "", my_addr);
-                //thrListen.Abort();
+                //thrListen.Abort();d
                 thrListen.Join(1);
-
                 return false;
             }
 
             for (int i = 0; i < Attempts; i++)
             {
-                Console.WriteLine("      Connection check: " + i);
+                Console.WriteLine("[Connection check] Attempt: " + i);
 
                 //Посылаем сообщение проверки сервера и ждем ответ
                 Send(1, "", login_addr);
@@ -417,9 +442,9 @@ namespace DX
         }
 
         //Устанавливаем сессию с заданным именем
-        public bool LogNstart_Session(string Char_Name, int Sleep_Interval = 200, int Attempts = 5)
+        public bool LogAndGame(string Char_Name, int Sleep_Interval = 200, int Attempts = 5)
         {
-            if (available_port == false) { Console.WriteLine("UDP client not set"); return false; }
+            if (available_port == false) { Console.WriteLine("[LogAndGame]: UDP client not set"); return false; }
 
             char_name = Char_Name;
 
@@ -433,17 +458,17 @@ namespace DX
                 listen = true;
                 if (!thrListen.IsAlive) thrListen.Start();
             }
-            catch (Exception e) { Console.WriteLine("LogNstart: " + e.Message); }
+            catch (Exception e) { Console.WriteLine("[LogAndGame] Catch:" + e.Message); }
 
             //Пытаемся начать сессию указанное количество раз
             for (int i = 0; i < Attempts; i++)
             {
-                Console.WriteLine("      Attempt: " + i);
+                Console.WriteLine("[LogAndGame] Attempt: " + i);
                 //Отсылаем сообщение начала сессии
                 Send(2, Char_Name, login_addr); // BEGIN
                 Thread.Sleep(Sleep_Interval);
-                string copy = Recv_Msg;//--------<?costyl'?
-                switch (copy)
+
+                switch (Recv_Msg)
                 {
                     case "STARTED":
                         IsExit = false;
@@ -459,12 +484,14 @@ namespace DX
         public bool End_Session(int Sleep_Interval = 200, int Attempts = 5)
         {
             IsExit = true;
-            //Пытаемся сказать клиенту что я кончаю
+
+            //Пытаемся сказать серверу, что я кончаю
             for (int i = 0; i < Attempts; i++)
             {
-                Console.WriteLine("      Attempt: " + i);
+                Console.WriteLine("[End Session] Attempt: " + i);
                 Send(3, char_name, game_addr);//END
                 Thread.Sleep(Sleep_Interval);
+
                 if (Exit_Status == "SUCCESSFUL")
                 {
                     // Останавливаем цикл в дополнительном потоке
@@ -473,25 +500,34 @@ namespace DX
 
                     // Принудительно закрываем объект класса UdpClient 
                     if (client_udp != null) client_udp.Close();
+
                     // Для корректного завершения дополнительного потока подключаем его к основному потоку.
-                    if (thrListen != null) thrListen.Abort();
-                    Console.WriteLine("Closed successfully");
+                    if (thrListen != null)
+                    {
+                        //thrListen.Abort();
+                        thrListen.Join(1);
+                    }
+                    Console.WriteLine("[End Session]: Performed successfully");
                     return true;
                 }
             }
             //Если не получили ответа то и фиг с ним, всеравно кончать надо
             listen = false;
             session_ON = false;
-            if (thrListen != null) thrListen.Abort();
             if (client_udp != null) client_udp.Close();
-            Console.WriteLine("Closed without server notification");
+            if (thrListen != null)
+            {
+                //thrListen.Abort();
+                thrListen.Join(1);
+            }           
+            Console.WriteLine("[End Session]: Client closed without server notification");
             return false;
         }
 
         // Функция извлекающая пришедшие сообщения работающая в отдельном потоке.
         void Listener()
         {
-            byte[] msg = new byte[512];
+            byte[] msg = new byte[256];
             try
             {
                 while (listen)
@@ -499,7 +535,7 @@ namespace DX
                     ipendpoint = null;
                     msg = client_udp.Receive(ref ipendpoint);
 
-                    //if(msg.Length>10)Console.WriteLine("Received:  " + Cons.GetName10b(msg));
+                    //Console.WriteLine("Received:  " + Cons.GetData(msg));
 
                     //Реакция если сообщение получено только с гейм или лог сервера
                     if ((login_addr.ToString() == ipendpoint.ToString()) && (login_addr.Port == ipendpoint.Port)
@@ -525,7 +561,8 @@ namespace DX
                             //Уведомление сервером о том, что сессия успешно завершена 
                             case 252:
                                 Console.WriteLine("Exit message: " + Cons.GetData(msg));
-                                if (IsExit) exit_status = "SUCCESSFUL"; //Чтобы сессию не завершить по ошибке какой-либо сделал проверку
+                                //Проверка, чтобы не завершить сессию по какой-либо ошибке
+                                if (IsExit) exit_status = "SUCCESSFUL"; 
                                 break;
                             //Сервер присылает координаты всех чаров и их имен
                             case 251://CH_XYD
@@ -533,10 +570,17 @@ namespace DX
                                 string name = Cons.GetName17b(msg);
 
                                 //Если в пакете есть имя перса клиента
-                                if (name == char_name)  Cons.Parse_MyXYD(Players[0], msg);
+                                if (name == char_name) ; //Cons.Parse_MyXYD(Players[0], msg);
                                 else { Cons.Parse_CharsXYD(ref Players, msg); }
                                 break;
-
+                            case 250://PLAYER_INFO	| 1[lvl] 2-5[maxHP] 6-end[charname]	
+                                break;
+                            case 249:// PLAYER_END | [charname]
+                                string data = Cons.GetData(msg);
+                                Console.WriteLine("Player END: " + data);
+                                Send(6,"OK"+data, game_addr);
+                                Cons.DeletePlayer(ref Players, data);
+                                break;
                         }
                     }
                 }
@@ -560,7 +604,7 @@ namespace DX
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Возникло исключение в отправке по аддресу: " + addr + ex.ToString() + "\n " + ex.Message);
+                Console.WriteLine("Send(byte) catch: " + addr + ex.ToString() + "\n " + ex.Message);
             }
         }
         public void Send(byte command, string message, IPEndPoint addr)
@@ -577,7 +621,7 @@ namespace DX
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Возникло исключение в отправке по аддресу: " + addr + ex.ToString() + "\n " + ex.Message);
+                Console.WriteLine("Send(string) catch: " + addr + ex.ToString() + "\n " + ex.Message);
             }
         }
 

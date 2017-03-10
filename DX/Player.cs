@@ -162,7 +162,7 @@ namespace DX
             }
         }
 
-        public void MovedByControl(bool W, bool A, bool S, bool D, int[,] map) {
+        public void MovedByControl(bool W, bool A, bool S, bool D, byte[,] map) {
             float speed = basespeed + speedbuff;
             if (alive)
             {
@@ -289,42 +289,42 @@ namespace DX
         }
 
         
-        public bool CheckCollisionR(int[,] map) {
+        public bool CheckCollisionR(byte[,] map) {
             float speed = basespeed + speedbuff;
             int X = (int)(x + speed +.3f);
             int Y = (int)y;
             if(X<0||X>map.GetUpperBound(0)||Y<0||Y>map.GetUpperBound(1))return true;
-            if (map[X, Y] >= 3&& map[X, Y] <= 5) return false;
+            if (map[X, Y] == 1) return false;
             return true;
         }
 
-        public bool CheckCollisionL(int[,] map)
+        public bool CheckCollisionL(byte[,] map)
         {
             float speed = basespeed + speedbuff;
             int X = (int)(x - speed - .3f);
             int Y = (int)y;
             if (X < 0 || X > map.GetUpperBound(0) || Y < 0 || Y > map.GetUpperBound(1)) return true;
-            if (map[X, Y] >= 3 && map[X, Y] <= 5) return false;
+            if (map[X, Y] == 1) return false;
             return true;
         }
 
-        public bool CheckCollisionU(int[,] map)
+        public bool CheckCollisionU(byte[,] map)
         {
             float speed = basespeed + speedbuff;
             int X = (int)x;
             int Y = (int)(y+speed + .18f);
             if (X < 0 || X > map.GetUpperBound(0) || Y < 0 || Y > map.GetUpperBound(1)) return true;
-            if (map[X, Y] >= 3 && map[X, Y] <= 5) return false;
+            if (map[X, Y] == 1) return false;
             return true;
         }
 
-        public bool CheckCollisionD(int[,] map)
+        public bool CheckCollisionD(byte[,] map)
         {
             float speed = basespeed + speedbuff;
             int X = (int)x;
             int Y = (int)(y - speed - .1f);
             if (X < 0 || X > map.GetUpperBound(0) || Y < 0 || Y > map.GetUpperBound(1)) return true;
-            if (map[X, Y] >= 3 && map[X, Y] <= 5) return false;
+            if (map[X, Y] == 1) return false;
             return true;
         }
 

@@ -32,3 +32,17 @@ C:\Users\Алексей\Documents\Visual Studio 2015\Projects\DX_TRY\DX\obj\Debu
 C:\Users\Алексей\Documents\Visual Studio 2015\Projects\DX_TRY\DX\obj\Debug\DX.Form1.resources
 C:\Users\Алексей\Documents\Visual Studio 2015\Projects\DX_TRY\DX\obj\Debug\DX.Properties.Resources.resources
 C:\Users\Алексей\Documents\Visual Studio 2015\Projects\DX_TRY\DX\obj\Debug\DX.csproj.GenerateResource.Cache
+C:\Users\User\Desktop\CourseWorkMMO-master\DX\bin\Debug\DX.exe.config
+C:\Users\User\Desktop\CourseWorkMMO-master\DX\bin\Debug\DX.exe
+C:\Users\User\Desktop\CourseWorkMMO-master\DX\bin\Debug\DX.pdb
+C:\Users\User\Desktop\CourseWorkMMO-master\DX\bin\Debug\SharpDX.dll
+C:\Users\User\Desktop\CourseWorkMMO-master\DX\bin\Debug\SharpDX.xml
+C:\Users\User\Desktop\CourseWorkMMO-master\DX\bin\Debug\Tao.FreeGlut.xml
+C:\Users\User\Desktop\CourseWorkMMO-master\DX\bin\Debug\Tao.OpenGl.xml
+C:\Users\User\Desktop\CourseWorkMMO-master\DX\bin\Debug\Tao.Platform.Windows.xml
+C:\Users\User\Desktop\CourseWorkMMO-master\DX\obj\Debug\DX.csprojResolveAssemblyReference.cache
+C:\Users\User\Desktop\CourseWorkMMO-master\DX\obj\Debug\DX.Form1.resources
+C:\Users\User\Desktop\CourseWorkMMO-master\DX\obj\Debug\DX.Properties.Resources.resources
+C:\Users\User\Desktop\CourseWorkMMO-master\DX\obj\Debug\DX.csproj.GenerateResource.Cache
+C:\Users\User\Desktop\CourseWorkMMO-master\DX\obj\Debug\DX.exe
+C:\Users\User\Desktop\CourseWorkMMO-master\DX\obj\Debug\DX.pdb

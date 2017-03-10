@@ -160,7 +160,6 @@ namespace DX
                 case 0:
                     {
                         if (player.X > 30 && player.X < 43 && player.Y > 30 && player.Y < 43) {
-                            startkills = player.KilledEnemies[0];
                             StateUp();
                         }
                         break;
@@ -168,6 +167,7 @@ namespace DX
                 case 1: {
                         if (counter != player.KilledEnemies[1] - startkills)
                         {
+                            startkills = player.KilledEnemies[1];
                             counter = player.KilledEnemies[1] - startkills;
                             Desc[0] = "Andre asked for your help\nthe Scary Ghost's tourchering\npeople on the south, you should \nkill them all (" + counter.ToString() + "/" + killlimit.ToString() + ")";
                             if (counter >= killlimit) StateUp();

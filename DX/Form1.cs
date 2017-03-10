@@ -15,6 +15,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.Net;
 using System.Diagnostics;
+using System.Threading;
 
 namespace DX
 {
@@ -36,6 +37,9 @@ namespace DX
 
         int[,] map;
         int[,] obj_map;
+        byte[,] col_map;
+
+        int pingcounter = 0;
 
         //float x, y;
         float ScaleH, ScaleW;
@@ -139,12 +143,11 @@ namespace DX
 
             //
             //
-
-            Player[] Players = GetNearbyPlayers(player.X, player.Y, PlayersList);
-
+            
             for(int i=1;i<PlayersList.Length;i++)
             {
                 if (PlayersList[i] == null) continue;
+                if (Math.Sqrt((player.X - PlayersList[i].X) * (player.X - PlayersList[i].X) + (player.Y - PlayersList[i].Y) * (player.Y - PlayersList[i].Y)) > 11f) continue;
                 PlayersList[i].CalcAnim();
                 if (PlayersList[i].Alive)
                 {
@@ -498,18 +501,18 @@ namespace DX
                 LogicTimer.Start();
                 QuestCheckTimer.Start();
 
-                /*Reader=new Task(() => {
-                    while (connect!=null) {
+                Reader=new Task(() => {
+                    while (true) {
+                        Thread.Sleep(100);
                         if (this.IsDisposed) {
-                            connect.End_Session();
                             Process.GetCurrentProcess().Kill();
                             return;
                         }
                     }
 
-                });*/
+                });
 
-                //Reader.Start();
+                Reader.Start();
 
                 LoginScreenRenderTimer.Stop();
             }
@@ -530,8 +533,21 @@ namespace DX
             if (player.UP) Direction = 2;
 
             /*if(connect!=null)*/
-            connect.SetXYD(player.X, player.Y,player.Rotation,player.Hp, Direction);
-
+            if (!player.LEFT && !player.RIGHT && !player.UP && !player.DOWN)
+            {
+                if(pingcounter<5) connect.SetXYD(player.X, player.Y, player.Rotation, player.Hp, Direction);
+                if (pingcounter >= 200)
+                {
+                    pingcounter = 0;
+                    connect.SetXYD(player.X, player.Y, player.Rotation, player.Hp, Direction);
+                }
+                pingcounter++;
+            }
+            else
+            {
+                pingcounter = 0;
+                connect.SetXYD(player.X, player.Y, player.Rotation, player.Hp, Direction);
+            }
             foreach (KeyValuePair<int, Enemy> enemy in GetNearbyEnemies(player.X, player.Y, EnemyList))
             {
 
@@ -667,6 +683,14 @@ namespace DX
 
             obj_map = ObjMapReader.MapArray();
 
+            col_map = new byte[ObjMapReader.X, ObjMapReader.Y];
+
+            for (int i = 0; i < ObjMapReader.X; i++) {
+                for (int j = 0; j < ObjMapReader.Y; j++) {
+                    if (map[i, j] == 3 || map[i, j] == 4 || map[i, j] == 5) col_map[i, j] = 1; else col_map[i, j] = 0;
+                }
+            }
+
             //objects
             //Загрузил 12 текстурок, вместо 3, ведь вращать не додумался 
             Textures.Add("RoadR", LoadTexture("Tex//RoadText//R.png"));
@@ -779,7 +803,7 @@ namespace DX
                 bool A = IsKeyDown(Keys.A);
                 bool S = IsKeyDown(Keys.S);
                 bool D = IsKeyDown(Keys.D);
-                player.MovedByControl(W, A, S, D, map);
+                player.MovedByControl(W, A, S, D, col_map);
             }
         }
 
@@ -1045,7 +1069,7 @@ namespace DX
                 connect.Set_Addr(ip, 4445, 4444);
                 if (connect.IsConnectable())
                 {
-                    connect.LogNstart_Session(char_name);
+                    connect.LogAndGame(char_name);
                     textBox1.Enabled = false;
                     textBox2.Enabled = false;
                     button1.Enabled = false;
@@ -1076,24 +1100,9 @@ namespace DX
         }
 
 
-        Player[] GetNearbyPlayers(float playerX, float playerY, Player[] Players)
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            var output = new Player[Players.Length];
-            int j = 0;
-
-            output[0] = Players[0];
-
-            for(int i = 1; i < Players.Length; i++) {
-                if (Players[i] != null)
-                {
-                    if (Math.Sqrt((playerX - Players[i].X) * (playerX - Players[i].X) + (playerY - Players[i].Y) * (playerY - Players[i].Y)) < 11f)
-                    {
-                        output[j] = Players[i];
-                    }
-                    j++;
-                }
-            }
-            return output;
+            connect.End_Session();
         }
 
         Item GetNearestItem() {
