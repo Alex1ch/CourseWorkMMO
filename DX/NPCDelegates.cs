@@ -18,7 +18,7 @@ namespace DX
             Task.Factory.StartNew(() =>
             {
                 player.DialogMenu = true;
-                if (player.Quests[0].State != 3) ThisNPC.DialogMenuText = ThisNPC.Dialogs[player.Quests[0].State + 1];
+                if (player.Quests[0].State != 4) ThisNPC.DialogMenuText = ThisNPC.Dialogs[player.Quests[0].State + 1];
                 else ThisNPC.DialogMenuText = ThisNPC.Dialogs[0];
 
                 //if (player.Quests[0].State == 0 || player.Quests[0].State == 2) player.Quests[0].StateUp();
@@ -26,7 +26,7 @@ namespace DX
 
                 while (Math.Sqrt((ThisNPC.X - player.X) * (ThisNPC.X - player.X) + (ThisNPC.Y - player.Y) * (ThisNPC.Y - player.Y))<3f) {
                     Thread.Sleep(30);
-                    if (IsKeyDown(Keys.D1) && (player.Quests[0].State == 0 || player.Quests[0].State == 2)) {
+                    if (IsKeyDown(Keys.D1) && (player.Quests[0].State == 0 || player.Quests[0].State == 3)) {
                         player.Quests[0].StateUp();
                         break;
                     }
@@ -42,7 +42,7 @@ namespace DX
         }
 
         static public bool AndreExMark(Player player) {
-            if (player.Quests[0].State == 0 || player.Quests[0].State == 2) return true;
+            if (player.Quests[0].State == 0 || player.Quests[0].State == 3) return true;
             return false;
         }
 

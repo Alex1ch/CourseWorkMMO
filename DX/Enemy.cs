@@ -12,18 +12,30 @@ namespace DX
         protected string texture;
         float hp;
         protected float maxHp;
-        float x, y;
+        protected float x, y;
+        protected float base_x, base_y;
         bool active=true;
+
+        protected int RespawnRate;// Респаун в секундах
+        protected long DeathTime;
+
+        public void WorkFunc(List<Player> Players, List<Item> Drop, Random RNG) {
+            WorkCycle(Players);
+            if (active)if(DeathCheck()) DropFunc(Drop, RNG); 
+        }
 
         public virtual void WorkCycle(List<DX.Player> Player) { }
 
         public virtual void DropFunc(List<Item> DropList, Random RNG) { }
-        
+
+        public virtual void CalcAnim() { }
+
         public bool DeathCheck() {
             if (hp > 0) {
                 return false;
             }
             active = false;
+            DeathTime = DateTime.Now.Ticks;
             return true;
         }
         
@@ -53,7 +65,7 @@ namespace DX
             }
         }
 
-        public float Y
+        public virtual float Y
         {
             get
             {
@@ -123,6 +135,10 @@ class Ghost : DX.Enemy {
     float ddy = .01f;
     DX.Player aggro;
 
+    public override float Y {
+        get { return y + ddysum; }
+        set { y = value; }
+    }
 
     public override void DropFunc(List<DX.Item> DropList, Random RNG) {
         int pool = RNG.Next(100);
@@ -131,46 +147,61 @@ class Ghost : DX.Enemy {
         if (pool < 13) DropList.Add(new DX.Gold(X, Y, RNG.Next(30, 100)));
     }
 
-    public override void WorkCycle(List<DX.Player> Player) {
-        Task.Factory.StartNew(() =>
-        {
-            base.Y += ddy;
-            ddysum += ddy;
-            if (ddysum > .4f || ddysum < -.4f) { ddy *= -1; ddysum = 0; }
+    public override void CalcAnim() {
+        ddysum += ddy;
+        if (ddysum > .4f || ddysum < -.4f) { ddy *= -1; }
+        //Console.WriteLine(ddysum.ToString());
+    }
 
-            foreach (DX.Player player in Player)
+    public override void WorkCycle(List<DX.Player> Player) {
+            if (Active)
             {
-                float dist = (float)Math.Sqrt((player.X - base.X) * (player.X - base.X) + (player.Y - base.Y) * (player.Y - base.Y));
-                if (aggro == null) if (dist < 5&&player.Alive)
-                    {
-                        aggro = player;
-                    }
-                    else { }
-                else
+                foreach (DX.Player player in Player)
                 {
-                    float dist1 = (float)Math.Sqrt((aggro.X - base.X) * (aggro.X - base.X) + (aggro.Y - base.Y) * (aggro.Y - base.Y));
-                    if (dist1 > 5)
-                    {
-                        aggro = null;
-                        dx = 0;
-                        dy = 0;
-                    }
+                    float dist = (float)Math.Sqrt((player.X - base.X) * (player.X - base.X) + (player.Y - base.Y) * (player.Y - base.Y));
+                    if (aggro == null) if (dist < 5 && player.Alive)
+                        {
+                            aggro = player;
+                        }
+                        else { }
                     else
                     {
-                        dx = (aggro.X - base.X) / dist1;
-                        dy = (aggro.Y - base.Y) / dist1;
-                        if (dist1 < 1&&aggro.Alive) aggro.Hp -= atk;
-                        if (!aggro.Alive) {
+                        float dist1 = (float)Math.Sqrt((aggro.X - base.X) * (aggro.X - base.X) + (aggro.Y - base.Y) * (aggro.Y - base.Y));
+                        if (dist1 > 5)
+                        {
                             aggro = null;
                             dx = 0;
                             dy = 0;
                         }
+                        else
+                        {
+                            dx = (aggro.X - base.X) / dist1;
+                            dy = (aggro.Y - base.Y) / dist1;
+                            if (dist1 < 1 && aggro.Alive) aggro.Hp -= atk;
+                            if (!aggro.Alive)
+                            {
+                                aggro = null;
+                                dx = 0;
+                                dy = 0;
+                            }
+                        }
                     }
                 }
+                base.X += dx * speed;
+                base.Y += dy * speed;
             }
-            base.X += dx * speed;
-            base.Y += dy * speed;
-        });
+            else {
+            //Console.WriteLine("DeathTime = "+DeathTime.ToString()+";  Now = "+ DateTime.Now.Ticks.ToString() + ";  Sub = "+ (DateTime.Now.Ticks - DeathTime).ToString());
+                if (DateTime.Now.Ticks - DeathTime > RespawnRate*10000000) {
+                    dx = 0;
+                    dy = 0;
+                    Y = base_y;
+                    X = base_x;
+                    HP = MaxHp;
+                    aggro = null;
+                    Active = true;
+                }
+            }
     }
 
     public Ghost() {
@@ -182,14 +213,28 @@ class Ghost : DX.Enemy {
 
     public Ghost(float X, float Y,Random RNG)
     {
-        base.Id = 1;
+        RespawnRate = 15;//В СЕКУНДАХ
+        base.Id = 1;//id типа
         ddy = RNG.Next(600,1000)*.00001f;
         base.maxHp = 100;
         base.HP = base.MaxHp;
         base.texture = "Ghost";
+        base_x = X;
+        base_y = Y;
         base.X = X;
         base.Y = Y;
     }
 
-    
+    public Ghost(float X, float Y)
+    {
+        RespawnRate = 15;
+        base.Id = 1;
+        base.maxHp = 100;
+        base.HP = base.MaxHp;
+        base.texture = "Ghost";
+        base_x = X;
+        base_y = Y;
+        base.X = X;
+        base.Y = Y;
+    }
 }

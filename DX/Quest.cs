@@ -145,37 +145,36 @@ namespace DX
         int killlimit = 7;
 
         public DarkSignsQuest() {
-            base.Reward.Add(new Potion(PotionType.Energy, 2));
-            base.FinishState = 3;
+            base.Reward.Add(new Gold(100000));
+            base.FinishState = 4;
             base.Name = "Dark Signs";
             base.Desc = new string[base.FinishState];
-            Desc[0] = "Andre asked for your help\nthe Scary Ghost's tourchering\npeople on the south, you should \nkill them all (0/" + killlimit.ToString()+")" ;
-            Desc[1] = "Civilians saved, Ghosts were killed,\nreturn to Andre for your reward";
-            Desc[2] = "Quest Complete!";
+            Desc[1] = "Andre asked for your help\nthe Scary Ghost's tourchering\npeople on the south, you should \nkill them all (0/" + killlimit.ToString()+")";
+            Desc[2] = "Civilians saved, Ghosts were killed,\nreturn to Andre for your reward";
+            Desc[3] = "Quest Complete!";
         }
 
         public override void QuestCheck(Player player)
         {
             switch (State) {
-                case 0:
+                case 1:
                     {
-                        if (player.X > 30 && player.X < 43 && player.Y > 30 && player.Y < 43) {
-                            StateUp();
-                        }
+                        startkills = player.KilledEnemies[1];
+                        StateUp();
                         break;
                     }
-                case 1: {
+                case 2: {
                         if (counter != player.KilledEnemies[1] - startkills)
                         {
-                            startkills = player.KilledEnemies[1];
+                            //Console.WriteLine(player.KilledEnemies[1]);
                             counter = player.KilledEnemies[1] - startkills;
-                            Desc[0] = "Andre asked for your help\nthe Scary Ghost's tourchering\npeople on the south, you should \nkill them all (" + counter.ToString() + "/" + killlimit.ToString() + ")";
+                            Desc[1] = "Andre asked for your help\nthe Scary Ghost's tourchering\npeople on the south, you should \nkill them all (" + counter.ToString() + "/" + killlimit.ToString() + ")";
                             if (counter >= killlimit) StateUp();
                                 else PopUpFunc();
                         }
                         break;
                     }
-                case 3:
+                case 4:
                     {
                         FinishCheck(player);
                         break;

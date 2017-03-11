@@ -26,7 +26,7 @@ namespace DX
         {
             for (int i = 1; i < players.Length; i++)
             {
-                if(players[i]!=null)
+                if (players[i] != null)
                     if (players[i].Name == name) return i;
             }
             return -1;
@@ -146,7 +146,7 @@ namespace DX
 
             int index = HaveEntry(players, name);
 
-            if (index==-1)
+            if (index == -1)
             {
                 Player player = new Player(BitConverter.ToSingle(x, 0), BitConverter.ToSingle(y, 0), name);
                 players[GetNull(players)] = player;
@@ -193,7 +193,7 @@ namespace DX
             else
             {
                 Player player = players[index];
-                player.X = BitConverter.ToSingle(x, 0) ;
+                player.X = BitConverter.ToSingle(x, 0);
                 player.Y = BitConverter.ToSingle(y, 0);
                 player.Rotation = BitConverter.ToSingle(r, 0);
 
@@ -234,8 +234,8 @@ namespace DX
                 }
                 player.Hp = BitConverter.ToSingle(hp, 0);
             }
-        
-        
+
+
         }
 
         public static bool DeletePlayer(ref Player[] players, string name)
@@ -249,12 +249,58 @@ namespace DX
                 return true;
             }
         }
+
+        //248		MOB_XYD		| 1-4[x] 5-8[y] 8-11[rotation] 12[d] 13-16[hp] 17-20[type] 21-end[id]
+        public static void Parse_MobsXYD(ref Enemy[] enemies, byte[] msg)
+        {
+            byte[] x = new byte[4];
+            byte[] y = new byte[4];
+            byte[] r = new byte[4];
+            byte d = 0;
+            byte[] hp = new byte[4];
+            byte[] type = new byte[4];
+            byte[] id = new byte[4];
+
+            Array.Copy(msg, 0, x, 0, 4);
+            Array.Copy(msg, 4, y, 0, 4);
+            Array.Copy(msg, 8, r, 0, 4);
+            d = msg[12];
+            Array.Copy(msg, 13, hp, 0, 4);
+            Array.Copy(msg, 17, type, 0, 4);
+            Array.Copy(msg, 21, id, 0, 4);
+
+            int ID = BitConverter.ToInt32(id, 0);
+            Random rnd = new Random();
+
+            //Console.WriteLine("X="+ BitConverter.ToSingle(x, 0).ToString() + " Y="+ BitConverter.ToSingle(y, 0).ToString() + " type="+ BitConverter.ToInt32(type, 0).ToString() + " id=" + BitConverter.ToInt32(id, 0).ToString());
+
+        //    if (enemies != null)
+          //  {
+                switch (BitConverter.ToInt32(type, 0))
+                {
+                    case 1:
+                        if (enemies[ID] == null)
+                        {
+                            enemies[ID] = new Ghost(BitConverter.ToSingle(x, 0), BitConverter.ToSingle(y, 0), rnd);
+                            enemies[ID].HP = BitConverter.ToSingle(hp, 0);
+                        }
+                        else
+                        {
+                            enemies[ID].X = BitConverter.ToSingle(x, 0);
+                            enemies[ID].Y = BitConverter.ToSingle(y, 0);
+                            enemies[ID].HP = BitConverter.ToSingle(hp, 0);
+                        }
+                        break;
+                }
+            //}
+        }
     }
 
 
     class NetGame
     {
         Player[] Players;
+        Enemy[] Mobs;
 
         static UdpClient client_udp;
         static IPEndPoint login_addr;
@@ -353,9 +399,10 @@ namespace DX
         }
 
         //Только с использованием Set_Addr, Расчитано на много попыток подключения (под разными имеми и аддресами)
-        public NetGame(int My_Port, ref Player[] dict)
+        public NetGame(int My_Port, ref Player[] dict, ref Enemy[] enemyd)
         {
             Players = dict;
+            Mobs = enemyd;
             my_port = My_Port;
 
             //Ищем свободный порт
@@ -369,7 +416,7 @@ namespace DX
             log_port = Log_Port;
             game_port = Game_Port;
             ip = IP;
-       
+
             //Адреса логин и гейм серва
             login_addr = new IPEndPoint(IPAddress.Parse(ip), log_port);
             game_addr = new IPEndPoint(IPAddress.Parse(ip), game_port);
@@ -388,7 +435,7 @@ namespace DX
                     available_port = true;
                     return true;
                 }
-                catch (Exception e){}
+                catch (Exception e) { }
             }
             return false;
         }
@@ -519,7 +566,7 @@ namespace DX
             {
                 //thrListen.Abort();
                 thrListen.Join(1);
-            }           
+            }
             Console.WriteLine("[End Session]: Client closed without server notification");
             return false;
         }
@@ -562,7 +609,7 @@ namespace DX
                             case 252:
                                 Console.WriteLine("Exit message: " + Cons.GetData(msg));
                                 //Проверка, чтобы не завершить сессию по какой-либо ошибке
-                                if (IsExit) exit_status = "SUCCESSFUL"; 
+                                if (IsExit) exit_status = "SUCCESSFUL";
                                 break;
                             //Сервер присылает координаты всех чаров и их имен
                             case 251://CH_XYD
@@ -578,8 +625,11 @@ namespace DX
                             case 249:// PLAYER_END | [charname]
                                 string data = Cons.GetData(msg);
                                 Console.WriteLine("Player END: " + data);
-                                Send(6,"OK"+data, game_addr);
+                                Send(6, "OK" + data, game_addr);
                                 Cons.DeletePlayer(ref Players, data);
+                                break;
+                            case 248:
+                                Cons.Parse_MobsXYD(ref Mobs, msg);
                                 break;
                         }
                     }
@@ -626,7 +676,7 @@ namespace DX
         }
 
         //Отправить серверу координаты персонажа 
-        public bool SetXYD(float X, float Y, float Rotation,float HP , byte Direction)
+        public bool SetXYD(float X, float Y, float Rotation, float HP, byte Direction)
         {
             //Если сессия не установлена, то отправить сообщение такого рода нельзя
             if (!session_ON)

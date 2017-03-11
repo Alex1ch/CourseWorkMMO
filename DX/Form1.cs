@@ -29,7 +29,7 @@ namespace DX
         string LoginScreenErr = "";
 
         Dictionary<string, int> Textures;
-        Dictionary<int, Enemy> EnemyList;
+        Enemy[] EnemyList;
         Player[] PlayersList=new Player[1000];
         List<Item> DropList;
         List<Player> AllPlayers;
@@ -181,18 +181,19 @@ namespace DX
 
             //отрисовка противников
 
-            foreach (KeyValuePair<int, Enemy> enemy in GetNearbyEnemies(player.X, player.Y, EnemyList))
+            foreach (Enemy enemy in EnemyList)
             {
-                if (enemy.Value.Active)
+                if (enemy == null) continue;
+                if (enemy.Active)
                 {
                     if (!player.Alive) Gl.glColor3f(.5f, .5f, .5f);
                     else Gl.glColor3f(1f, 1f, 1f);
                     //Gl.glClearDepth(1);
-                    Draw2DTextCent(enemy.Value.X, enemy.Value.Y+.6f, OnScreenYtoZ(enemy.Value.Y), 1.2f, 1.2f, Textures[enemy.Value.Texture]);
+                    Draw2DTextCent(enemy.X, enemy.Y+.6f, OnScreenYtoZ(enemy.Y), 1.2f, 1.2f, Textures[enemy.Texture]);
                     Gl.glColor3f(0f, 0f, 0f);
-                    Draw2DText(enemy.Value.X - .6f, enemy.Value.Y + 1.25f, -3, .9f, .15f, Textures["HPBAR"]);
+                    Draw2DText(enemy.X - .6f, enemy.Y + 1.25f, -3, .9f, .15f, Textures["HPBAR"]);
                     Gl.glColor3f(1f, 0f, 0f);
-                    Draw2DText(enemy.Value.X - .6f, enemy.Value.Y + 1.25f, -3, .9f / enemy.Value.MaxHp * enemy.Value.HP, .15f, Textures["HPBAR"]);
+                    Draw2DText(enemy.X - .6f, enemy.Y + 1.25f, -3, .9f / enemy.MaxHp * enemy.HP, .15f, Textures["HPBAR"]);
                 }
             }
 
@@ -459,15 +460,14 @@ namespace DX
                 AllPlayers.Add(player);
                 PlayersList[0] = player;
 
-                EnemyList = new Dictionary<int, Enemy>();
 
-                EnemyList.Add(0, new Ghost(80, 70, RNG));
-                EnemyList.Add(1, new Ghost(82, 69, RNG));
-                EnemyList.Add(2, new Ghost(84, 68, RNG));
-                EnemyList.Add(3, new Ghost(85, 69, RNG));
-                EnemyList.Add(4, new Ghost(84, 68, RNG));
-                EnemyList.Add(5, new Ghost(79, 68, RNG));
-                EnemyList.Add(6, new Ghost(81, 69, RNG));
+                EnemyList[0]= new Ghost(80, 70, RNG);
+                EnemyList[1]= new Ghost(82, 69, RNG);
+                EnemyList[2]= new Ghost(84, 68, RNG);
+                EnemyList[3]= new Ghost(85, 69, RNG);
+                EnemyList[4]= new Ghost(84, 68, RNG);
+                EnemyList[5]= new Ghost(79, 68, RNG);
+                EnemyList[6]= new Ghost(81, 69, RNG);
 
                 DropList = new List<Item>();
 
@@ -531,8 +531,7 @@ namespace DX
             if (player.RIGHT) Direction = 1;
             if (player.DOWN) Direction = 4;
             if (player.UP) Direction = 2;
-
-            /*if(connect!=null)*/
+            
             if (!player.LEFT && !player.RIGHT && !player.UP && !player.DOWN)
             {
                 if(pingcounter<5) connect.SetXYD(player.X, player.Y, player.Rotation, player.Hp, Direction);
@@ -548,15 +547,12 @@ namespace DX
                 pingcounter = 0;
                 connect.SetXYD(player.X, player.Y, player.Rotation, player.Hp, Direction);
             }
-            foreach (KeyValuePair<int, Enemy> enemy in GetNearbyEnemies(player.X, player.Y, EnemyList))
+            for(int i=0;i<EnemyList.Length;i++)
             {
+                if (EnemyList[i] == null) continue;
 
-
-                enemy.Value.WorkCycle(AllPlayers);
-                if (enemy.Value.DeathCheck()) {
-                    enemy.Value.DropFunc(DropList, RNG);
-                    EnemyList.Remove(enemy.Key);
-                }
+                EnemyList[i].CalcAnim();
+                EnemyList[i].WorkFunc(AllPlayers,DropList,RNG);
             }
             textBox3.Text = "";
         }
@@ -636,7 +632,8 @@ namespace DX
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            connect = new NetGame(4446, ref PlayersList); //Server ip, log port, game port, my port
+            EnemyList = new Enemy[1000];
+            connect = new NetGame(4446, ref PlayersList,ref EnemyList); //Server ip, log port, game port, my port
             RNG = new Random(Environment.TickCount);
 
             ScrW = 16;
@@ -1010,13 +1007,19 @@ namespace DX
         }
 
 
-        Dictionary<int, Enemy> GetNearbyEnemies(float playerX, float playerY, Dictionary<int, Enemy> Enemies) {
-            Dictionary<int, Enemy> output = new Dictionary<int, Enemy>();
-            foreach (KeyValuePair<int, Enemy> enemy in Enemies) {
-                if (Math.Sqrt((playerX - enemy.Value.X) * (playerX - enemy.Value.X) + (playerY - enemy.Value.Y) * (playerY - enemy.Value.Y)) < 11f) {
-                    output.Add(enemy.Key,enemy.Value);
+        Enemy[] GetNearbyEnemies(float playerX, float playerY, Enemy[] Enemies) {
+            Enemy[] output = new Enemy[Enemies.Length];
+            int index=0;
+
+            for (int i=0;i<Enemies.Length;i++) {
+                if (Enemies[i] == null) continue;
+                if (Math.Sqrt((playerX - Enemies[i].X) * (playerX - Enemies[i].X) + (playerY - Enemies[i].Y) * (playerY - Enemies[i].Y)) < 11f) {
+                    output[index]=Enemies[i];
+                    index++;
                 }
             }
+
+
             return output;
         }
 

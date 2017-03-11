@@ -265,7 +265,7 @@ namespace DX
             RunAnState = 0;
         }
 
-        public void AttackFunc(Dictionary<int,Enemy> EnemyList) {
+        public void AttackFunc(Enemy[] EnemyList) {
             if(!Attack&&alive)Task.Factory.StartNew(() => {
                 Attack = true;
                 float rotationtoenemy;
@@ -274,14 +274,16 @@ namespace DX
                     AttackAtState = i;
                     Thread.Sleep(attackRate);
                 }
-                foreach (KeyValuePair<int, Enemy> enemy in EnemyList)
+                
+                for(int i=0;i<EnemyList.Length;i++)
                 {
-                    rotationtoenemy = (float)(Math.Atan2((enemy.Value.Y - y), (enemy.Value.X - x)) / Math.PI * 180);
-                    if (Math.Sqrt((x - enemy.Value.X) * (x - enemy.Value.X) + (y - enemy.Value.Y) * (y - enemy.Value.Y)) < 1.8f&&
+                    if (EnemyList[i] == null) break;
+                    rotationtoenemy = (float)(Math.Atan2((EnemyList[i].Y - y), (EnemyList[i].X - x)) / Math.PI * 180);
+                    if (Math.Sqrt((x - EnemyList[i].X) * (x - EnemyList[i].X) + (y - EnemyList[i].Y) * (y - EnemyList[i].Y)) < 1.8f&&
                         (Math.Abs(rotation-rotationtoenemy)<50||Math.Abs(rotationtoenemy-rotation)>310))
                     {
-                        enemy.Value.HP -= atkDmg;
-                        if (enemy.Value.DeathCheck()) KilledEnemies[enemy.Value.Id]++;
+                        EnemyList[i].HP -= atkDmg;
+                        if (EnemyList[i].DeathCheck()) KilledEnemies[EnemyList[i].Id]++;
                     }
                 }
                 Attack = false;
