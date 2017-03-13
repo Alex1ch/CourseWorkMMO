@@ -630,7 +630,7 @@ namespace DX
                                 // вытаскиваю имя перса из пакета
                                 string name = Cons.GetName18b(msg);
                                 //Если в пакете есть имя перса клиента
-                                if (name == char_name) Cons.Parse_MyXYD(Players[0], msg);
+                                if (name == char_name) ;// Cons.Parse_MyXYD(Players[0], msg);
                                 else { Cons.Parse_CharsXYD(ref Players, msg); }
                                 break;
                             case 250://PLAYER_INFO	| 1[lvl] 2-5[maxHP] 6-end[charname]	
