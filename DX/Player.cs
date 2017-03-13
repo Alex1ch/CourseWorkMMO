@@ -290,7 +290,26 @@ namespace DX
             });
         }
 
-        
+
+
+
+        public void AttackAnimFunc()
+        {
+            if (!Attack && alive) Task.Factory.StartNew(() => {
+                Attack = true;
+                for (int i = 0; i < AttackFrames; i++)
+                {
+                    AttackAtState = i;
+                    Thread.Sleep(attackRate);
+                }
+
+                Attack = false;
+            });
+        }
+
+
+
+
         public bool CheckCollisionR(byte[,] map) {
             float speed = basespeed + speedbuff;
             int X = (int)(x + speed +.3f);

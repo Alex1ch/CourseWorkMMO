@@ -461,13 +461,13 @@ namespace DX
                 PlayersList[0] = player;
 
 
-                EnemyList[0]= new Ghost(80, 70, RNG);
+                /*EnemyList[0]= new Ghost(80, 70, RNG);
                 EnemyList[1]= new Ghost(82, 69, RNG);
                 EnemyList[2]= new Ghost(84, 68, RNG);
                 EnemyList[3]= new Ghost(85, 69, RNG);
                 EnemyList[4]= new Ghost(84, 68, RNG);
                 EnemyList[5]= new Ghost(79, 68, RNG);
-                EnemyList[6]= new Ghost(81, 69, RNG);
+                EnemyList[6]= new Ghost(81, 69, RNG);*/
 
                 DropList = new List<Item>();
 
@@ -534,25 +534,26 @@ namespace DX
             
             if (!player.LEFT && !player.RIGHT && !player.UP && !player.DOWN)
             {
-                if(pingcounter<5) connect.SetXYD(player.X, player.Y, player.Rotation, player.Hp, Direction);
+                if(pingcounter<5) connect.SendXYD(player.X, player.Y, player.Rotation, player.Hp, Direction);
                 if (pingcounter >= 200)
                 {
                     pingcounter = 0;
-                    connect.SetXYD(player.X, player.Y, player.Rotation, player.Hp, Direction);
+                    connect.SendXYD(player.X, player.Y, player.Rotation, player.Hp, Direction);
                 }
                 pingcounter++;
             }
             else
             {
                 pingcounter = 0;
-                connect.SetXYD(player.X, player.Y, player.Rotation, player.Hp, Direction);
+                connect.SendXYD(player.X, player.Y, player.Rotation, player.Hp, Direction);
             }
             for(int i=0;i<EnemyList.Length;i++)
             {
                 if (EnemyList[i] == null) continue;
 
                 EnemyList[i].CalcAnim();
-                EnemyList[i].WorkFunc(AllPlayers,DropList,RNG);
+                EnemyList[i].DeathCheck();
+                //EnemyList[i].WorkFunc(AllPlayers,DropList,RNG);
             }
             textBox3.Text = "";
         }
@@ -633,7 +634,7 @@ namespace DX
         private void Form1_Load(object sender, EventArgs e)
         {
             EnemyList = new Enemy[1000];
-            connect = new NetGame(4446, ref PlayersList,ref EnemyList); //Server ip, log port, game port, my port
+            connect = new NetGame(4446, ref PlayersList, ref EnemyList, ref DropList); //Server ip, log port, game port, my port
             RNG = new Random(Environment.TickCount);
 
             ScrW = 16;
@@ -812,7 +813,9 @@ namespace DX
             {
                 if (e.Button == MouseButtons.Left)
                 {
-                    player.AttackFunc(GetNearbyEnemies(player.X, player.Y, EnemyList));
+                    connect.SendHit(1,e.X,e.Y,2,3);//Удар, Параметры оказались ненужны, пох на них
+                    player.AttackAnimFunc();
+                    //player.AttackFunc(GetNearbyEnemies(player.X, player.Y, EnemyList));
                 }
                 if (e.Button == MouseButtons.Right)
                 {
@@ -893,7 +896,7 @@ namespace DX
                 }
                 if (e.KeyCode == Keys.J) QuestMenu = !QuestMenu;
                 if (e.KeyCode == Keys.I) {
-                    Console.Write("Инвентарь открылся ууууух!");
+                    //Console.Write("Инвентарь открылся ууууух!");
                     InvMenu = !InvMenu; }
                 if (e.KeyCode == Keys.Escape) { InvMenu = false; QuestMenu = false; }
             }
@@ -1070,9 +1073,14 @@ namespace DX
                 };
 
                 connect.Set_Addr(ip, 4445, 4444);
-                if (connect.IsConnectable())
+                if (!connect.IsConnectable())
                 {
-                    connect.LogAndGame(char_name);
+                    LoginScreenErr = "Server unreachable";
+                    return;
+                }
+
+                if (connect.LogAndGame(char_name, 200, 5))
+                {
                     textBox1.Enabled = false;
                     textBox2.Enabled = false;
                     button1.Enabled = false;
@@ -1080,13 +1088,15 @@ namespace DX
                     textBox2.Visible = false;
                     button1.Visible = false;
                     LoginScreen = false;
-
                 }
-                else
+                else 
                 {
-                    LoginScreenErr = "Can't connect to server";
+                    LoginScreenErr = connect.denied_info;
                     return;
                 }
+                
+
+               
         }
 
         List<NPC> GetNearbyNPCs(float playerX, float playerY, List<NPC> NPCs)

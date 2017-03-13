@@ -55,14 +55,12 @@ namespace DX
             return name;
         }
 
-        //Изьятия имени из пакетов XYD (с 10го байта по конец)
-        public static string GetName17b(byte[] pack)
+        //Изьятия имени из пакетов XYD (с 18го байта по конец)
+        public static string GetName18b(byte[] pack)
         {
-            string name = "";
             byte[] nameB = new byte[pack.Length - 18];
-            Array.Copy(pack, 17, nameB, 0, pack.Length - 18);
-            name = Encoding.UTF8.GetString(nameB);
-            return name;
+            Array.Copy(pack, 18, nameB, 0, pack.Length - 18);
+            return Encoding.UTF8.GetString(nameB);
         }
 
         //Заносим в координаты в переменную перса клиента
@@ -72,49 +70,49 @@ namespace DX
             byte[] y = new byte[4];
             byte[] r = new byte[4];
             byte[] hp = new byte[4];
-            byte[] d = new byte[1];
+            byte d = 0;
 
-            Array.Copy(msg, 0, x, 0, 4);
-            Array.Copy(msg, 4, y, 0, 4);
-            Array.Copy(msg, 8, r, 0, 4);
-            Array.Copy(msg, 12, d, 0, 1);
-            Array.Copy(msg, 13, hp, 0, 4);
+            Array.Copy(msg, 1, x, 0, 4);
+            Array.Copy(msg, 5, y, 0, 4);
+            Array.Copy(msg, 9, r, 0, 4);
+            d = msg[13];
+            Array.Copy(msg, 14, hp, 0, 4);
 
             // вытаскиваю имя перса из пакета
-            string name = GetName17b(msg);
+            string name = GetName18b(msg);
 
             player.X = BitConverter.ToSingle(x, 0);
             player.Y = BitConverter.ToSingle(y, 0);
             player.Rotation = BitConverter.ToSingle(r, 0);
-            if (d[0] == 0)
+            if (d == 0)
             {
                 player.LEFT = false;
                 player.UP = false;
                 player.RIGHT = false;
                 player.DOWN = false;
             }
-            if (d[0] == 1)
+            if (d == 1)
             {
                 player.RIGHT = true;
                 player.DOWN = false;
                 player.LEFT = false;
                 player.UP = false;
             }
-            if (d[0] == 2)
+            if (d == 2)
             {
                 player.RIGHT = false;
                 player.DOWN = false;
                 player.LEFT = false;
                 player.UP = true;
             }
-            if (d[0] == 3)
+            if (d == 3)
             {
                 player.RIGHT = false;
                 player.DOWN = false;
                 player.LEFT = true;
                 player.UP = false;
             }
-            if (d[0] == 4)
+            if (d == 4)
             {
                 player.RIGHT = false;
                 player.DOWN = true;
@@ -135,14 +133,14 @@ namespace DX
             byte[] hp = new byte[4];
             byte d = 0;
 
-            Array.Copy(msg, 0, x, 0, 4);
-            Array.Copy(msg, 4, y, 0, 4);
-            Array.Copy(msg, 8, r, 0, 4);
-            d = msg[12];
-            Array.Copy(msg, 13, hp, 0, 4);
+            Array.Copy(msg, 1, x, 0, 4);
+            Array.Copy(msg, 5, y, 0, 4);
+            Array.Copy(msg, 9, r, 0, 4);
+            d = msg[13];
+            Array.Copy(msg, 14, hp, 0, 4);
 
             // вытаскиваю имя перса из пакета
-            string name = GetName17b(msg);
+            string name = GetName18b(msg);
 
             int index = HaveEntry(players, name);
 
@@ -161,31 +159,31 @@ namespace DX
                 }
                 if (d == 1)
                 {
-                    player.RIGHT = true;
-                    player.DOWN = false;
-                    player.LEFT = false;
-                    player.UP = false;
+                   player.LEFT = false;
+                   player.UP = false;
+                   player.DOWN = false;
+                   player.RIGHT = true;
                 }
                 if (d == 2)
                 {
+                    player.LEFT = false;
                     player.RIGHT = false;
                     player.DOWN = false;
-                    player.LEFT = false;
                     player.UP = true;
                 }
                 if (d == 3)
                 {
-                    player.RIGHT = false;
-                    player.DOWN = false;
-                    player.LEFT = true;
-                    player.UP = false;
+                   player.UP = false;
+                   player.RIGHT = false;
+                   player.DOWN = false;
+                   player.LEFT = true;
                 }
                 if (d == 4)
                 {
-                    player.RIGHT = false;
-                    player.DOWN = true;
                     player.LEFT = false;
                     player.UP = false;
+                    player.RIGHT = false;
+                    player.DOWN = true;
                 }
                 player.Hp = BitConverter.ToSingle(hp, 0);
 
@@ -206,31 +204,31 @@ namespace DX
                 }
                 if (d == 1)
                 {
-                    player.RIGHT = true;
-                    player.DOWN = false;
                     player.LEFT = false;
                     player.UP = false;
+                    player.DOWN = false;
+                    player.RIGHT = true;
                 }
                 if (d == 2)
                 {
+                    player.LEFT = false;
                     player.RIGHT = false;
                     player.DOWN = false;
-                    player.LEFT = false;
                     player.UP = true;
                 }
                 if (d == 3)
                 {
+                    player.UP = false;
                     player.RIGHT = false;
                     player.DOWN = false;
                     player.LEFT = true;
-                    player.UP = false;
                 }
                 if (d == 4)
                 {
-                    player.RIGHT = false;
-                    player.DOWN = true;
                     player.LEFT = false;
                     player.UP = false;
+                    player.RIGHT = false;
+                    player.DOWN = true;
                 }
                 player.Hp = BitConverter.ToSingle(hp, 0);
             }
@@ -261,21 +259,17 @@ namespace DX
             byte[] type = new byte[4];
             byte[] id = new byte[4];
 
-            Array.Copy(msg, 0, x, 0, 4);
-            Array.Copy(msg, 4, y, 0, 4);
-            Array.Copy(msg, 8, r, 0, 4);
-            d = msg[12];
-            Array.Copy(msg, 13, hp, 0, 4);
-            Array.Copy(msg, 17, type, 0, 4);
-            Array.Copy(msg, 21, id, 0, 4);
+            Array.Copy(msg, 1, x, 0, 4);
+            Array.Copy(msg, 5, y, 0, 4);
+            Array.Copy(msg, 9, r, 0, 4);
+            d = msg[13];
+            Array.Copy(msg, 14, hp, 0, 4);
+            Array.Copy(msg, 18, type, 0, 4);
+            Array.Copy(msg, 22, id, 0, 4);
 
             int ID = BitConverter.ToInt32(id, 0);
             Random rnd = new Random();
 
-            //Console.WriteLine("X="+ BitConverter.ToSingle(x, 0).ToString() + " Y="+ BitConverter.ToSingle(y, 0).ToString() + " type="+ BitConverter.ToInt32(type, 0).ToString() + " id=" + BitConverter.ToInt32(id, 0).ToString());
-
-        //    if (enemies != null)
-          //  {
                 switch (BitConverter.ToInt32(type, 0))
                 {
                     case 1:
@@ -292,7 +286,29 @@ namespace DX
                         }
                         break;
                 }
-            //}
+        }
+
+        //247		DROP_SET 	| 1-4[x] 5-8[y] 9-12[item] 13-16[quantity]
+        public static void Parse_DropItems(ref List<Item> Items, byte[] msg)
+        {
+            byte[] xb = new byte[4];
+            byte[] yb = new byte[4];
+            byte[] itemb = new byte[4];
+            byte[] quantityb = new byte[4];
+
+            Array.Copy(msg, 1, xb, 0, 4);
+            Array.Copy(msg, 5, yb, 0, 4);
+            Array.Copy(msg, 9, itemb, 0, 4);
+            Array.Copy(msg, 13, quantityb, 0, 4);
+
+            int item = BitConverter.ToInt32(itemb, 0);
+
+            switch (item)
+            {
+                case 0:
+                    Console.WriteLine("Health");
+                    break;
+            }
         }
     }
 
@@ -301,6 +317,7 @@ namespace DX
     {
         Player[] Players;
         Enemy[] Mobs;
+        List<Item> Items;
 
         static UdpClient client_udp;
         static IPEndPoint login_addr;
@@ -334,6 +351,19 @@ namespace DX
             }
         }
 
+        //Старт сессии
+        static private string start_msg = "";
+        public string Start_Msg
+        {
+            get
+            {
+                string copy = start_msg;
+                start_msg = "";
+                return copy;
+            }
+        }
+        byte[] start_info;
+        public string denied_info = "Error while logging";
         //Cтатус выхода
         static private string exit_status = "";
         public string Exit_Status
@@ -359,27 +389,6 @@ namespace DX
             }
         }
 
-        //Координаты других персов
-        /*static Dictionary<string, float[]> Characters = new Dictionary<string, float[]>(15);
-        public Dictionary<string, float[]> Characters_XYD
-        {
-            get
-            {
-                if (Characters.Keys.Contains(char_name)) Characters.Remove(char_name);
-                return Characters;
-            }
-        }*/
-
-        //Координаты мобов
-        /*static Dictionary<string, float[]> Mobs = new Dictionary<string, float[]>(15);
-        public Dictionary<string, float[]> Mobs_XYD
-        {
-            get
-            {
-                return Mobs;
-            }
-        }*/
-
         //IP, Port
         public NetGame(string IP, int Log_Port, int Game_Port, int My_Port, ref Player[] dict)
         {
@@ -399,10 +408,12 @@ namespace DX
         }
 
         //Только с использованием Set_Addr, Расчитано на много попыток подключения (под разными имеми и аддресами)
-        public NetGame(int My_Port, ref Player[] dict, ref Enemy[] enemyd)
+        public NetGame(int My_Port, ref Player[] dict, ref Enemy[] enemyd, ref List<Item> items)
         {
             Players = dict;
             Mobs = enemyd;
+            Items = items;
+
             my_port = My_Port;
 
             //Ищем свободный порт
@@ -515,11 +526,13 @@ namespace DX
                 Send(2, Char_Name, login_addr); // BEGIN
                 Thread.Sleep(Sleep_Interval);
 
-                switch (Recv_Msg)
+                switch (Start_Msg)
                 {
                     case "STARTED":
                         IsExit = false;
                         session_ON = true;
+                        Console.WriteLine("Started session, my ID: " + Cons.GetData(start_info));
+                        Send(5, "OK" + Cons.GetData(start_info), login_addr);
                         return true;
                     case "DENIED": return false;
                 }
@@ -596,13 +609,14 @@ namespace DX
                                 break;
                             //Сервер сообщает о старте Сессии   
                             case 254:
-                                Console.WriteLine("Started session, my ID: " + Cons.GetData(msg));
-                                Send(5, "OK" + Cons.GetData(msg), login_addr);
-                                rec_msg = "STARTED";
+                                start_info = msg;
+                                start_msg = "STARTED";
+                                Console.WriteLine("Received:  " + Cons.GetData(msg));
                                 break;
                             //Отказ сервером начать сессию
                             case 253:
                                 Console.WriteLine("Can't start session: " + Cons.GetData(msg));
+                                denied_info = Cons.GetData(msg);
                                 rec_msg = "DENIED";
                                 break;
                             //Уведомление сервером о том, что сессия успешно завершена 
@@ -614,10 +628,9 @@ namespace DX
                             //Сервер присылает координаты всех чаров и их имен
                             case 251://CH_XYD
                                 // вытаскиваю имя перса из пакета
-                                string name = Cons.GetName17b(msg);
-
+                                string name = Cons.GetName18b(msg);
                                 //Если в пакете есть имя перса клиента
-                                if (name == char_name) ; //Cons.Parse_MyXYD(Players[0], msg);
+                                if (name == char_name) Cons.Parse_MyXYD(Players[0], msg);
                                 else { Cons.Parse_CharsXYD(ref Players, msg); }
                                 break;
                             case 250://PLAYER_INFO	| 1[lvl] 2-5[maxHP] 6-end[charname]	
@@ -630,6 +643,9 @@ namespace DX
                                 break;
                             case 248:
                                 Cons.Parse_MobsXYD(ref Mobs, msg);
+                                break;
+                            case 247:
+                                Cons.Parse_DropItems(ref Items, msg);
                                 break;
                         }
                     }
@@ -645,7 +661,7 @@ namespace DX
         public void Send(byte command, byte[] msg, IPEndPoint addr)
         {
             byte[] s_packet = new byte[1 + msg.Length];
-            for (int i = 1; i < msg.Length; i++) s_packet[i] = msg[i];
+            for (int i = 1; i < msg.Length+1; i++) s_packet[i] = msg[i-1];
             s_packet[0] = command;
 
             try
@@ -676,7 +692,7 @@ namespace DX
         }
 
         //Отправить серверу координаты персонажа 
-        public bool SetXYD(float X, float Y, float Rotation, float HP, byte Direction)
+        public bool SendXYD(float X, float Y, float Rotation, float HP, byte Direction)
         {
             //Если сессия не установлена, то отправить сообщение такого рода нельзя
             if (!session_ON)
@@ -696,11 +712,38 @@ namespace DX
             Array.Copy(Xb, output, 4);
             Array.Copy(Yb, 0, output, 4, 4);
             Array.Copy(Rotb, 0, output, 8, 4);
-            Array.Copy(HPb, 0, output, 13, 4);
             output[12] = Direction;//(0-нету, 1-право, 2-вверх, 3- влево, 4-вниз 
+            Array.Copy(HPb, 0, output, 13, 4);        
             Array.Copy(Char_Name, 0, output, 17, name_len);
 
             Send(4, output, game_addr);
+            return true;
+        }
+
+        //Удар
+        //HIT  | 0[type of attack] 1-4[x] 5-8[y] 9[npc or player] 10-13[id or name]
+        public bool SendHit(byte type_hit, float x, float y, byte who_hit, int id)
+        {
+            //Если сессия не установлена, то отправить сообщение такого рода нельзя
+            if (!session_ON)
+            {
+                Console.WriteLine("Cant send HIT, try to start session before");
+                return false;
+            }
+
+            byte[] xB = BitConverter.GetBytes(x);
+            byte[] yB = BitConverter.GetBytes(y);
+            byte[] idB = BitConverter.GetBytes(id);
+
+            byte[] output = new byte[1 + 4 + 4 + 1 + 4];
+
+            output[0] = type_hit;
+            Array.Copy(xB, 0, output, 1, 4);
+            Array.Copy(yB, 0, output, 5, 4);
+            output[9] = who_hit;
+            Array.Copy(yB, 0, output, 10, 4);
+
+            Send(7, output, game_addr);
             return true;
         }
     }
