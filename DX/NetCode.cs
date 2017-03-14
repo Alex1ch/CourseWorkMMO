@@ -289,25 +289,44 @@ namespace DX
         }
 
         //247		DROP_SET 	| 1-4[x] 5-8[y] 9-12[item] 13-16[quantity]
-        public static void Parse_DropItems(ref List<Item> Items, byte[] msg)
+        public static bool Parse_DropItems(ref List<Item> Items, byte[] msg)
         {
             byte[] xb = new byte[4];
             byte[] yb = new byte[4];
             byte[] itemb = new byte[4];
             byte[] quantityb = new byte[4];
+            byte[] idb = new byte[4];
 
             Array.Copy(msg, 1, xb, 0, 4);
             Array.Copy(msg, 5, yb, 0, 4);
             Array.Copy(msg, 9, itemb, 0, 4);
             Array.Copy(msg, 13, quantityb, 0, 4);
+            Array.Copy(msg, 17, idb, 0, 4);
 
             int item = BitConverter.ToInt32(itemb, 0);
+            Items.Find(i => i.Id_exemplar == BitConverter.ToInt32(idb, 0));
+
 
             switch (item)
             {
                 case 0:
                     Console.WriteLine("Health");
-                    break;
+                     Items.Add(new Potion(PotionType.Health,BitConverter.ToInt32(quantityb,0),BitConverter.ToSingle(xb,0),BitConverter.ToSingle(yb,0), BitConverter.ToInt32(idb, 0)));
+                    return true;
+                case 1:
+                    Console.WriteLine("Speed");
+                    Items.Add(new Potion(PotionType.Speed, BitConverter.ToInt32(quantityb, 0), BitConverter.ToSingle(xb, 0), BitConverter.ToSingle(yb, 0), BitConverter.ToInt32(idb, 0)));
+                    return true;
+                case 2:
+                    Console.WriteLine("Energy");
+                    Items.Add(new Potion(PotionType.Energy, BitConverter.ToInt32(quantityb, 0), BitConverter.ToSingle(xb, 0), BitConverter.ToSingle(yb, 0), BitConverter.ToInt32(idb, 0)));
+                    return true;
+                case 69:
+                    Console.WriteLine("Gold");
+                    Items.Add(new Gold(BitConverter.ToSingle(xb, 0), BitConverter.ToSingle(yb, 0), BitConverter.ToInt32(quantityb, 0), BitConverter.ToInt32(idb, 0)));
+                    return true;
+                default:
+                    return false;
             }
         }
     }
@@ -645,7 +664,9 @@ namespace DX
                                 Cons.Parse_MobsXYD(ref Mobs, msg);
                                 break;
                             case 247:
-                                Cons.Parse_DropItems(ref Items, msg);
+                                string data8 = Cons.GetData(msg);
+                                Send(8, "OK" + data8, game_addr);
+                                Console.WriteLine("Adding item: " + Cons.Parse_DropItems(ref Items, msg));
                                 break;
                         }
                     }

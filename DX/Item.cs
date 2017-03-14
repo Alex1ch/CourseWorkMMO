@@ -25,6 +25,7 @@ namespace DX
         }
 
         int id;
+        int id_exemplar;
 
         virtual public void WorkFunc(Player player) {
 
@@ -226,14 +227,28 @@ namespace DX
                 desc = value;
             }
         }
+
+        public int Id_exemplar
+        {
+            get
+            {
+                return id_exemplar;
+            }
+
+            set
+            {
+                id_exemplar = value;
+            }
+        }
     }
 
     public class Gold : Item
     {
-        public Gold(float X, float Y, int quantity) {
+        public Gold(float X, float Y, int quantity, int id_ex) {
             base.X = X;
             base.Y = Y;
             base.Id = 69;
+            base.Id_exemplar = id_ex;
             base.MaxQuantity = int.MaxValue;
             base.Dropped = true;
             base.Quantity = quantity;
@@ -264,11 +279,12 @@ namespace DX
     {
         PotionType potionType;
 
-        public Potion(PotionType _potionType, int quantity, float x, float y)
+        public Potion(PotionType _potionType, int quantity, float x, float y, int id_ex)
         {
             base.Dropped = true;
             base.X = x;
             base.Y = y;
+            base.Id_exemplar = id_ex;
             potionType = _potionType;
             base.MaxQuantity = 20;
             base.Quantity = quantity;
