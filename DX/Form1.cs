@@ -26,11 +26,14 @@ namespace DX
         NetGame connect;
         Random RNG;
 
+        const int MAXPLAYERS = 200;
+        const int MAXENEMY = 1000;
+
         string LoginScreenErr = "";
 
         Dictionary<string, int> Textures;
-        Enemy[] EnemyList;
-        Player[] PlayersList=new Player[1000];
+        Enemy[] EnemyList=new Enemy[MAXENEMY];
+        Player[] PlayersList=new Player[MAXPLAYERS];
         List<Item> DropList;
         List<Player> AllPlayers;
         List<NPC> NPCList;
@@ -159,7 +162,6 @@ namespace DX
                     Draw2DText(PlayersList[i].X - .45f, PlayersList[i].Y + 1.1f, -3, .9f / PlayersList[i].MaxHp * PlayersList[i].Hp, .15f, Textures["HPBAR"]);
                     Gl.glColor3f(1, 1, 1);
                     Draw2DTextCent(PlayersList[i].X, PlayersList[i].Y+0.6f, OnScreenYtoZ(PlayersList[i].Y), 1.5f, 1.5f, Textures[PlayersList[i].Texture]);
-
                 }
                 else
                 {
@@ -441,6 +443,7 @@ namespace DX
                         if (obj_map[i, j] == 12) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadZUR"]);
                         if (obj_map[i, j] == 13) Draw2DText(i, j, 0, 1f, 1f, Textures["RoadW"]);
                     }
+                    Thread.Sleep(1);
                 }
                 Gl.glLoadIdentity();
 
@@ -500,6 +503,8 @@ namespace DX
                 RenderTimer.Start();
                 LogicTimer.Start();
                 QuestCheckTimer.Start();
+                InterpolationTimer.Start();
+
 
                 Reader=new Task(() => {
                     while (true) {
@@ -633,7 +638,6 @@ namespace DX
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            EnemyList = new Enemy[1000];
             connect = new NetGame(4446, ref PlayersList, ref EnemyList, ref DropList); //Server ip, log port, game port, my port
             RNG = new Random(Environment.TickCount);
 
@@ -1072,7 +1076,7 @@ namespace DX
                     LoginScreenErr = "Wrong IP Format"; return;
                 };
 
-                connect.Set_Addr(ip, 4445, 4444);
+                connect.Set_Addr(ip, 5001, 5000);
                 if (!connect.IsConnectable())
                 {
                     LoginScreenErr = "Server unreachable";
@@ -1116,6 +1120,18 @@ namespace DX
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             connect.End_Session();
+        }
+
+        private void InterpolationTimer_Tick(object sender, EventArgs e)
+        {
+            for (int i = 1; i < PlayersList.Length; i++) {
+                if (PlayersList[i] == null) continue;
+                PlayersList[i].Interpolation();
+            }
+            for (int i = 0; i < EnemyList.Length; i++) {
+                if (EnemyList[i] == null) continue;
+                EnemyList[i].Interpolation();
+            }
         }
 
         Item GetNearestItem() {

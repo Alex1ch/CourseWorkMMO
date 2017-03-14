@@ -39,6 +39,7 @@
             this.button1 = new System.Windows.Forms.Button();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.textBox3 = new System.Windows.Forms.TextBox();
+            this.InterpolationTimer = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // RenderTimer
@@ -121,11 +122,16 @@
             this.textBox3.TabIndex = 5;
             this.textBox3.Text = "10.255.52.48";
             // 
+            // InterpolationTimer
+            // 
+            this.InterpolationTimer.Interval = 5;
+            this.InterpolationTimer.Tick += new System.EventHandler(this.InterpolationTimer_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1085, 640);
+            this.ClientSize = new System.Drawing.Size(1024, 640);
             this.Controls.Add(this.textBox3);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox2);
@@ -153,6 +159,7 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.Timer InterpolationTimer;
     }
 }
 

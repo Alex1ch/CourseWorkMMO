@@ -159,10 +159,10 @@ namespace DX
                 }
                 if (d == 1)
                 {
-                   player.LEFT = false;
-                   player.UP = false;
-                   player.DOWN = false;
-                   player.RIGHT = true;
+                    player.LEFT = false;
+                    player.UP = false;
+                    player.DOWN = false;
+                    player.RIGHT = true;
                 }
                 if (d == 2)
                 {
@@ -173,10 +173,10 @@ namespace DX
                 }
                 if (d == 3)
                 {
-                   player.UP = false;
-                   player.RIGHT = false;
-                   player.DOWN = false;
-                   player.LEFT = true;
+                    player.UP = false;
+                    player.RIGHT = false;
+                    player.DOWN = false;
+                    player.LEFT = true;
                 }
                 if (d == 4)
                 {
@@ -191,8 +191,8 @@ namespace DX
             else
             {
                 Player player = players[index];
-                player.X = BitConverter.ToSingle(x, 0);
-                player.Y = BitConverter.ToSingle(y, 0);
+                player.SX = BitConverter.ToSingle(x, 0);
+                player.SY = BitConverter.ToSingle(y, 0);
                 player.Rotation = BitConverter.ToSingle(r, 0);
 
                 if (d == 0)
@@ -270,22 +270,22 @@ namespace DX
             int ID = BitConverter.ToInt32(id, 0);
             Random rnd = new Random();
 
-                switch (BitConverter.ToInt32(type, 0))
-                {
-                    case 1:
-                        if (enemies[ID] == null)
-                        {
-                            enemies[ID] = new Ghost(BitConverter.ToSingle(x, 0), BitConverter.ToSingle(y, 0), rnd);
-                            enemies[ID].HP = BitConverter.ToSingle(hp, 0);
-                        }
-                        else
-                        {
-                            enemies[ID].X = BitConverter.ToSingle(x, 0);
-                            enemies[ID].Y = BitConverter.ToSingle(y, 0);
-                            enemies[ID].HP = BitConverter.ToSingle(hp, 0);
-                        }
-                        break;
-                }
+            switch (BitConverter.ToInt32(type, 0))
+            {
+                case 1:
+                    if (enemies[ID] == null)
+                    {
+                        enemies[ID] = new Ghost(BitConverter.ToSingle(x, 0), BitConverter.ToSingle(y, 0), rnd);
+                        enemies[ID].HP = BitConverter.ToSingle(hp, 0);
+                    }
+                    else
+                    {
+                        enemies[ID].SX = BitConverter.ToSingle(x, 0);
+                        enemies[ID].SY = BitConverter.ToSingle(y, 0);
+                        enemies[ID].HP = BitConverter.ToSingle(hp, 0);
+                    }
+                    break;
+            }
         }
 
         //247		DROP_SET 	| 1-4[x] 5-8[y] 9-12[item] 13-16[quantity]
@@ -661,7 +661,7 @@ namespace DX
         public void Send(byte command, byte[] msg, IPEndPoint addr)
         {
             byte[] s_packet = new byte[1 + msg.Length];
-            for (int i = 1; i < msg.Length+1; i++) s_packet[i] = msg[i-1];
+            for (int i = 1; i < msg.Length + 1; i++) s_packet[i] = msg[i - 1];
             s_packet[0] = command;
 
             try
@@ -713,7 +713,7 @@ namespace DX
             Array.Copy(Yb, 0, output, 4, 4);
             Array.Copy(Rotb, 0, output, 8, 4);
             output[12] = Direction;//(0-нету, 1-право, 2-вверх, 3- влево, 4-вниз 
-            Array.Copy(HPb, 0, output, 13, 4);        
+            Array.Copy(HPb, 0, output, 13, 4);
             Array.Copy(Char_Name, 0, output, 17, name_len);
 
             Send(4, output, game_addr);

@@ -13,15 +13,30 @@ namespace DX
         float hp;
         protected float maxHp;
         protected float x, y;
+        private float sY;
         protected float base_x, base_y;
         bool active=true;
 
         protected int RespawnRate;// Респаун в секундах
         protected long DeathTime;
+        private float sX;
 
         public void WorkFunc(List<Player> Players, List<Item> Drop, Random RNG) {
             WorkCycle(Players);
             if (active)if(DeathCheck()) DropFunc(Drop, RNG); 
+        }
+
+        public void Interpolation() {
+
+            if (Math.Abs(sX - x) > 0.05 || Math.Abs(sY - y) > 0.05)
+            {
+                x += (sX - x) * 0.15f;
+                y += (sY - y) * .15f;
+            }
+            else
+            {
+                return;
+            }
         }
 
         public virtual void WorkCycle(List<DX.Player> Player) { }
@@ -62,6 +77,7 @@ namespace DX
             set
             {
                 x = value;
+                sX = value;
             }
         }
 
@@ -75,6 +91,7 @@ namespace DX
             set
             {
                 y = value;
+                sY = value;
             }
         }
 
@@ -118,6 +135,32 @@ namespace DX
                 id = value;
             }
         }
+
+        public float SX
+        {
+            get
+            {
+                return sX;
+            }
+
+            set
+            {
+                sX = value;
+            }
+        }
+
+        public float SY
+        {
+            get
+            {
+                return sY;
+            }
+
+            set
+            {
+                sY = value;
+            }
+        }
     }
 }
 
@@ -137,7 +180,9 @@ class Ghost : DX.Enemy {
 
     public override float Y {
         get { return y + ddysum; }
-        set { y = value; }
+        set { y = value;
+            this.SY = value;
+        }
     }
 
     public override void DropFunc(List<DX.Item> DropList, Random RNG) {

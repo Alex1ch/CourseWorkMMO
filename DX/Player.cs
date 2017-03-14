@@ -10,7 +10,11 @@ namespace DX
     public class Player
     {
         public NPC LastNPC;
-        
+
+
+        byte direction = 0;
+
+        bool online = true;
 
         int id;
         float x=32, y=32;
@@ -24,6 +28,8 @@ namespace DX
         string name;
 
         int[] killedEnemies = new int[100];
+
+        float sX, sY;
 
         bool up = false;
         bool dialogMenu=false;
@@ -59,7 +65,19 @@ namespace DX
             name = _name;
             quests.Add(new DarkSignsQuest());
             x = pX; y = pY;
+            sX = x; sY = y;
             inventory = _inventory;
+        }
+
+
+        public void Interpolation() {
+            if (Math.Abs(sX - x) > basespeed || Math.Abs(sY - y) > basespeed)
+            {
+                x += (sX - x) * basespeed*3;
+                y += (sY - y) * basespeed*3;
+            }
+            else {
+                return; }
         }
 
 
@@ -278,6 +296,7 @@ namespace DX
                 for(int i=0;i<EnemyList.Length;i++)
                 {
                     if (EnemyList[i] == null) break;
+                    if (!EnemyList[i].Active) break;
                     rotationtoenemy = (float)(Math.Atan2((EnemyList[i].Y - y), (EnemyList[i].X - x)) / Math.PI * 180);
                     if (Math.Sqrt((x - EnemyList[i].X) * (x - EnemyList[i].X) + (y - EnemyList[i].Y) * (y - EnemyList[i].Y)) < 1.8f&&
                         (Math.Abs(rotation-rotationtoenemy)<50||Math.Abs(rotationtoenemy-rotation)>310))
@@ -359,6 +378,7 @@ namespace DX
             set
             {
                 x = value;
+                sX = value;
             }
         }
 
@@ -367,11 +387,13 @@ namespace DX
             get
             {
                 return y;
+                
             }
 
             set
             {
                 y = value;
+                sY = value;
             }
         }
 
@@ -656,6 +678,58 @@ namespace DX
             set
             {
                 texture = value;
+            }
+        }
+
+        public float SX
+        {
+            get
+            {
+                return sX;
+            }
+
+            set
+            {
+                sX = value;
+            }
+        }
+
+        public float SY
+        {
+            get
+            {
+                return sY;
+            }
+
+            set
+            {
+                sY = value;
+            }
+        }
+
+        public byte Direction
+        {
+            get
+            {
+                return direction;
+            }
+
+            set
+            {
+                direction = value;
+            }
+        }
+
+        public bool Online
+        {
+            get
+            {
+                return online;
+            }
+
+            set
+            {
+                online = value;
             }
         }
     }
