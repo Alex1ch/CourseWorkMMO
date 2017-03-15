@@ -28,7 +28,6 @@ C:\Users\Алексей\Documents\Visual Studio 2015\Projects\DX_TRY\DX\bin\Debu
 C:\Users\Алексей\Documents\Visual Studio 2015\Projects\DX_TRY\DX\bin\Debug\Tao.FreeGlut.xml
 C:\Users\Алексей\Documents\Visual Studio 2015\Projects\DX_TRY\DX\bin\Debug\Tao.OpenGl.xml
 C:\Users\Алексей\Documents\Visual Studio 2015\Projects\DX_TRY\DX\bin\Debug\Tao.Platform.Windows.xml
-C:\Users\Алексей\Documents\Visual Studio 2015\Projects\DX_TRY\DX\obj\Debug\DX.csprojResolveAssemblyReference.cache
 C:\Users\Алексей\Documents\Visual Studio 2015\Projects\DX_TRY\DX\obj\Debug\DX.Form1.resources
 C:\Users\Алексей\Documents\Visual Studio 2015\Projects\DX_TRY\DX\obj\Debug\DX.Properties.Resources.resources
 C:\Users\Алексей\Documents\Visual Studio 2015\Projects\DX_TRY\DX\obj\Debug\DX.csproj.GenerateResource.Cache
@@ -46,3 +45,4 @@ C:\Users\User\Desktop\CourseWorkMMO-master\DX\obj\Debug\DX.Properties.Resources.
 C:\Users\User\Desktop\CourseWorkMMO-master\DX\obj\Debug\DX.csproj.GenerateResource.Cache
 C:\Users\User\Desktop\CourseWorkMMO-master\DX\obj\Debug\DX.exe
 C:\Users\User\Desktop\CourseWorkMMO-master\DX\obj\Debug\DX.pdb
+C:\Users\Алексей\Documents\Visual Studio 2015\Projects\DX_TRY\DX\obj\Debug\DX.csprojResolveAssemblyReference.cache

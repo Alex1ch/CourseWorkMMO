@@ -78,11 +78,16 @@ namespace DX
             d = msg[13];
             Array.Copy(msg, 14, hp, 0, 4);
 
-            // вытаскиваю имя перса из пакета
-            string name = GetName18b(msg);
+            player.Hp = BitConverter.ToSingle(hp, 0);
 
-            player.X = BitConverter.ToSingle(x, 0);
-            player.Y = BitConverter.ToSingle(y, 0);
+            float X = BitConverter.ToSingle(x, 0);
+            float Y = BitConverter.ToSingle(y, 0);
+
+            if (false&&X == float.MinValue || Y == float.MinValue) return;
+
+            player.X = X;
+            player.Y = Y;
+
             player.Rotation = BitConverter.ToSingle(r, 0);
             if (d == 0)
             {
@@ -119,7 +124,6 @@ namespace DX
                 player.LEFT = false;
                 player.UP = false;
             }
-            player.Hp = BitConverter.ToSingle(hp, 0);
 
 
         }
@@ -649,7 +653,7 @@ namespace DX
                                 // вытаскиваю имя перса из пакета
                                 string name = Cons.GetName18b(msg);
                                 //Если в пакете есть имя перса клиента
-                                if (name == char_name) ;// Cons.Parse_MyXYD(Players[0], msg);
+                                if (name == char_name) Cons.Parse_MyXYD(Players[0], msg);
                                 else { Cons.Parse_CharsXYD(ref Players, msg); }
                                 break;
                             case 250://PLAYER_INFO	| 1[lvl] 2-5[maxHP] 6-end[charname]	
@@ -713,7 +717,7 @@ namespace DX
         }
 
         //Отправить серверу координаты персонажа 
-        public bool SendXYD(float X, float Y, float Rotation, float HP, byte Direction)
+        public bool SendXYD(float X, float Y, float Rotation, byte Direction)
         {
             //Если сессия не установлена, то отправить сообщение такого рода нельзя
             if (!session_ON)
@@ -725,17 +729,17 @@ namespace DX
             byte[] Xb = BitConverter.GetBytes(X);//кодируем флоат в массив байтов 
             byte[] Yb = BitConverter.GetBytes(Y);
             byte[] Rotb = BitConverter.GetBytes(Rotation);
-            byte[] HPb = BitConverter.GetBytes(HP);
+            //byte[] HPb = BitConverter.GetBytes(HP);
             byte[] Char_Name = Encoding.UTF8.GetBytes(char_name);//20+(n/2)×4 байт
             int name_len = Char_Name.Length;
-            byte[] output = new byte[4 + 4 + 4 + 1 + 4 + name_len];//склеиваем все в один массив 
+            byte[] output = new byte[4 + 4 + 4 + 1 + name_len];//склеиваем все в один массив 
 
             Array.Copy(Xb, output, 4);
             Array.Copy(Yb, 0, output, 4, 4);
             Array.Copy(Rotb, 0, output, 8, 4);
             output[12] = Direction;//(0-нету, 1-право, 2-вверх, 3- влево, 4-вниз 
-            Array.Copy(HPb, 0, output, 13, 4);
-            Array.Copy(Char_Name, 0, output, 17, name_len);
+            //Array.Copy(HPb, 0, output, 13, 4);
+            Array.Copy(Char_Name, 0, output, 13, name_len);
 
             Send(4, output, game_addr);
             return true;

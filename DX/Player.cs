@@ -11,6 +11,8 @@ namespace DX
     {
         public NPC LastNPC;
 
+        byte level;
+        long exp;
 
         byte direction = 0;
 
@@ -20,7 +22,7 @@ namespace DX
         float x=32, y=32;
         float rotation;
         float basespeed = .05f;
-        float speedbuff;
+        float speedbuff = 0;
         float hp = 100;
         float maxHp = 100;
         float hpUp=0;
@@ -730,6 +732,40 @@ namespace DX
             set
             {
                 online = value;
+            }
+        }
+
+        public byte Level
+        {
+            get
+            {
+                return level;
+            }
+
+            set
+            {
+                level = value;
+            }
+        }
+
+        public long Exp
+        {
+            get
+            {
+                return exp;
+            }
+
+            set
+            {
+                exp = value;
+            }
+        }
+
+        public float Speed
+        {
+            get
+            {
+                return basespeed+speedbuff;
             }
         }
     }

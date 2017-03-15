@@ -26,6 +26,8 @@ namespace DX
         NetGame connect;
         Random RNG;
 
+        
+
         const int MAXPLAYERS = 200;
         const int MAXENEMY = 1000;
 
@@ -539,18 +541,18 @@ namespace DX
             
             if (!player.LEFT && !player.RIGHT && !player.UP && !player.DOWN)
             {
-                if(pingcounter<5) connect.SendXYD(player.X, player.Y, player.Rotation, player.Hp, Direction);
+                if(pingcounter<5) connect.SendXYD(player.X, player.Y, player.Rotation, Direction);
                 if (pingcounter >= 200)
                 {
                     pingcounter = 0;
-                    connect.SendXYD(player.X, player.Y, player.Rotation, player.Hp, Direction);
+                    connect.SendXYD(player.X, player.Y, player.Rotation, Direction);
                 }
                 pingcounter++;
             }
             else
             {
                 pingcounter = 0;
-                connect.SendXYD(player.X, player.Y, player.Rotation, player.Hp, Direction);
+                connect.SendXYD(player.X, player.Y, player.Rotation, Direction);
             }
             for(int i=0;i<EnemyList.Length;i++)
             {
@@ -817,8 +819,11 @@ namespace DX
             {
                 if (e.Button == MouseButtons.Left)
                 {
-                    connect.SendHit(1,e.X,e.Y,2,3);//Удар, Параметры оказались ненужны, пох на них
-                    player.AttackAnimFunc();
+                    if (player.Alive)
+                    {
+                        connect.SendHit(1, e.X, e.Y, 2, 3);//Удар, Параметры оказались ненужны, пох на них
+                        player.AttackAnimFunc();
+                    }
                     //player.AttackFunc(GetNearbyEnemies(player.X, player.Y, EnemyList));
                 }
                 if (e.Button == MouseButtons.Right)
@@ -1133,6 +1138,7 @@ namespace DX
                 EnemyList[i].Interpolation();
             }
         }
+        
 
         Item GetNearestItem() {
             if (DropList.Count == 0) return null;
@@ -1151,6 +1157,23 @@ namespace DX
             if (NearestDist < 1.5f) return Nearest;
             else return null;
             
+        }
+
+        private void Form1_Resize_1(object sender, EventArgs e)
+        {
+            if (!LoginScreen)
+            {
+                RenderTimer.Stop();
+                Thread.Sleep(20);
+                ResizeGlScene();
+                RenderTimer.Start();
+            }
+            else {
+                LoginScreenRenderTimer.Stop();
+                Thread.Sleep(20);
+                ResizeGlScene();
+                LoginScreenRenderTimer.Start();
+            }
         }
 
         public static bool IsKeyDown(Keys key)
@@ -1191,10 +1214,35 @@ namespace DX
         }
 
 
+        void ResizeGlScene()
+        {
+            // Предупредим деление на нуль;
+            if (AnT.Height == 0)
+            {
+                AnT.Height = 1;
+            }
+            // инициализация режима экрана 
+            Glut.glutInitDisplayMode(Glut.GLUT_RGB | Glut.GLUT_DOUBLE);
 
-        
+            // установка цвета очистки экрана (RGBA) 
+            Gl.glClearColor(255, 255, 255, 1);
 
-        
+            // установка порта вывода 
+            Gl.glViewport(0, 0, AnT.Width, AnT.Height);
+
+            // активация проекционной матрицы 
+            Gl.glMatrixMode(Gl.GL_PROJECTION);
+            // очистка матрицы 
+            Gl.glLoadIdentity();
+
+            Gl.glOrtho(0.0, ScrW, 0.0, ScrH, 10, -10);
+
+            Gl.glMatrixMode(Gl.GL_MODELVIEW);
+            Gl.glLoadIdentity();
+        }
+
+
+
         [DllImport("user32.dll")]
         public extern static Int16 GetKeyState(Int16 nVirtKey);
     }

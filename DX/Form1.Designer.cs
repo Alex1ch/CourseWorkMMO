@@ -38,7 +38,6 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
             this.textBox2 = new System.Windows.Forms.TextBox();
-            this.textBox3 = new System.Windows.Forms.TextBox();
             this.InterpolationTimer = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
@@ -57,9 +56,10 @@
             this.AnT.BackColor = System.Drawing.Color.Black;
             this.AnT.ColorBits = ((byte)(32));
             this.AnT.DepthBits = ((byte)(16));
-            this.AnT.Location = new System.Drawing.Point(-1, 0);
+            this.AnT.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.AnT.Location = new System.Drawing.Point(0, 0);
             this.AnT.Name = "AnT";
-            this.AnT.Size = new System.Drawing.Size(1024, 640);
+            this.AnT.Size = new System.Drawing.Size(1029, 640);
             this.AnT.StencilBits = ((byte)(0));
             this.AnT.TabIndex = 0;
             this.AnT.KeyUp += new System.Windows.Forms.KeyEventHandler(this.AnT_KeyUp);
@@ -113,15 +113,6 @@
             this.textBox2.TabIndex = 3;
             this.textBox2.Text = "10.255.52.48";
             // 
-            // textBox3
-            // 
-            this.textBox3.Location = new System.Drawing.Point(1029, 12);
-            this.textBox3.Multiline = true;
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(139, 128);
-            this.textBox3.TabIndex = 5;
-            this.textBox3.Text = "10.255.52.48";
-            // 
             // InterpolationTimer
             // 
             this.InterpolationTimer.Interval = 5;
@@ -131,8 +122,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1024, 640);
-            this.Controls.Add(this.textBox3);
+            this.ClientSize = new System.Drawing.Size(1029, 640);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.textBox1);
@@ -142,6 +132,7 @@
             this.Text = " ";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.Resize += new System.EventHandler(this.Form1_Resize_1);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -158,7 +149,6 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.Timer InterpolationTimer;
     }
 }
