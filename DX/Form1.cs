@@ -26,6 +26,9 @@ namespace DX
         NetGame connect;
         Random RNG;
 
+        float InvPosX, InvPosY, InvSizeX, InvSizeY;
+        float QuestPosX, QuestPosY, QuestSizeX, QuestSizeY;
+
         bool fullscreen=false;
 
         const int MAXPLAYERS = 200;
@@ -192,7 +195,6 @@ namespace DX
                 {
                     if (!player.Alive) Gl.glColor3f(.5f, .5f, .5f);
                     else Gl.glColor3f(1f, 1f, 1f);
-                    //Gl.glClearDepth(1);
                     Draw2DTextCent(enemy.X, enemy.Y+.6f, OnScreenYtoZ(enemy.Y), 1.2f, 1.2f, Textures[enemy.Texture]);
                     Gl.glColor3f(0f, 0f, 0f);
                     Draw2DText(enemy.X - .6f, enemy.Y + 1.25f, -3, .9f, .15f, Textures["HPBAR"]);
@@ -217,25 +219,25 @@ namespace DX
             Gl.glPopMatrix();
 
 
-
+            //Перенеси куданить!!!!
             //Отрисовка меню
             //Инвентарь
             if (InvMenu)
             {
                 string quantitystr="";
                 Gl.glColor3f(.3f, .15f, 0);
-                Draw2DText(1,2,-3.5f,4,7,Textures["Menu"]);
+                Draw2DText(InvPosX,InvPosY,-3.5f,InvSizeX,InvSizeY,Textures["Menu"]);
                 Gl.glLoadIdentity();
-                DrawStringCent(1,5, 8.25f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, "Inventory", 1f, 1f, 1f, true);
+                DrawStringCent(InvPosX,InvPosX+InvSizeX, InvPosY+InvSizeY-.75f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, "Inventory", 1f, 1f, 1f, true);
                 for (int i = 0; i < player.Inventory.Size; i++) {
                     Gl.glColor3f(1, 1, 1);
-                    Draw2DText(1.5f+i%player.Inventory.Width*3f/4f,
-                               7-(i-i%player.Inventory.Width)/player.Inventory.Width * 3f / 4f,
+                    Draw2DText(InvPosX+.5f+i%player.Inventory.Width*3f/4f,
+                               InvSizeY+InvPosY-2f-(i-i%player.Inventory.Width)/player.Inventory.Width * 3f / 4f,
                                -3.5f, 3f/4f,3f/4f,
                                Textures["ItemBG"]);
                     if (player.Inventory.Items[i] != null) {
-                        Draw2DText(1.5f + i % player.Inventory.Width * 3f / 4f,
-                                   7 - (i - i % player.Inventory.Width) / player.Inventory.Width * 3f / 4f,
+                        Draw2DText(InvPosX + .5f + i % player.Inventory.Width * 3f / 4f,
+                                   InvSizeY + InvPosY - 2f - (i - i % player.Inventory.Width) / player.Inventory.Width * 3f / 4f,
                                    -3.5f, 3f / 4f, 3f / 4f,
                                    Textures[player.Inventory.Items[i].Texture]);
                     }
@@ -257,16 +259,16 @@ namespace DX
                                 quantitystr = (quantity / 1000000).ToString() + "kk";
                             }
                             else quantitystr = quantity.ToString();
-                            DrawStringFromRight(1.5F+ 3f/4f+i % player.Inventory.Width * 3f / 4f ,
-                                   7 - (i - i % player.Inventory.Width) / player.Inventory.Width * 3f / 4f,
+                            DrawStringFromRight(InvPosX+.5f+ 3f/4f+i % player.Inventory.Width * 3f / 4f ,
+                                   InvSizeY + InvPosY - 2f - (i - i % player.Inventory.Width) / player.Inventory.Width * 3f / 4f,
                                    -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, quantitystr,
                                    1, 1, 1, true);
                         }
                 }
 
-                    int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
-                int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
-                if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height && player.Inventory.Items[Y*player.Inventory.Width+X]!=null)
+                int X = ((MouseOnMatrixX - InvPosX - .5f) * 4f / 3f)>=0? (int)((MouseOnMatrixX - InvPosX - .5f) * 4f / 3f):-1;
+                int Y = ((InvSizeY + InvPosY - 2f + 3f / 4f - MouseOnMatrixY) * 4f / 3f)>=0? (int)((InvSizeY + InvPosY - 2f + 3f / 4f - MouseOnMatrixY) * 4f / 3f):-1;
+                if ( X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height&&player.Inventory.Items[Y * player.Inventory.Width + X] != null)
                 {
                     
                     float Width = Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_18, player.Inventory.Items[Y * player.Inventory.Width + X].Name ) * ScaleW
@@ -302,14 +304,21 @@ namespace DX
                 }
             }
 
+
+            QuestPosX = 11;
+            QuestPosY = 1.5f;
+            QuestSizeX = 4;
+            QuestSizeY =6.5f;
+
+
             if (QuestMenu)
             {
                 float TextCursor=0;
                 float Height;
                 Gl.glColor3f(.3f, .15f, 0);
-                Draw2DText(11,2,-3.5f,4,7,Textures["Menu"]);
+                Draw2DText(QuestPosX,QuestPosY,-3.5f,QuestSizeX,QuestSizeY,Textures["Menu"]);
                 Gl.glLoadIdentity();
-                DrawStringCent(11, 15, 8.25f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, "Quests", 1f, 1f, 1f, true);
+                DrawStringCent(QuestPosX, QuestPosX+ QuestSizeX, QuestPosY+ QuestSizeY- .75f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, "Quests", 1f, 1f, 1f, true);
                 foreach (Quest quest in player.Quests) {
                     if (quest.State != 0&&quest.Finished==false)
                     {
@@ -364,12 +373,12 @@ namespace DX
                 {
                     if (InvMenu) {
 
-                        DrawString(6, 9, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, quest.Name, 1f, 1f, .3f, true);
-                        DrawString(6, 8.5f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, quest.Desc[quest.State - 1], 1f, 1f, .3f, true);
+                        DrawString(6, 8, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, quest.Name, 1f, 1f, .3f, true);
+                        DrawString(6, 7.5f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, quest.Desc[quest.State - 1], 1f, 1f, .3f, true);
                     }
                     else { 
-                        DrawString(1, 9, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, quest.Name, 1f, 1f, .3f, true);
-                        DrawString(1, 8.5f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, quest.Desc[quest.State - 1], 1f, 1f, .3f, true);
+                        DrawString(1, 8, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, quest.Name, 1f, 1f, .3f, true);
+                        DrawString(1, 7.5f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, quest.Desc[quest.State - 1], 1f, 1f, .3f, true);
                     }
                     break;
                 }
@@ -499,7 +508,11 @@ namespace DX
 
                 Item.Drop = DropList;
 
-                player.Inventory.Add(new Potion(PotionType.Health, 3));
+                player.Inventory.Add(new Potion(PotionType.Health, 20));
+                player.Inventory.Add(new Potion(PotionType.Health, 20));
+                player.Inventory.Add(new Potion(PotionType.Health, 20));
+                player.Inventory.Add(new Potion(PotionType.Health, 20));
+                player.Inventory.Add(new Potion(PotionType.Health, 20));
                 player.Inventory.Add(new Gold(int.MaxValue));
 
                 RenderTimer.Start();
@@ -644,10 +657,15 @@ namespace DX
             RNG = new Random(Environment.TickCount);
 
             ScrW = 16;
-            ScrH = 10;
+            ScrH = 9;
 
             ScaleH = ScrH / AnT.Height;
             ScaleW = ScrW / AnT.Width;
+
+            InvPosX = 1;
+            InvPosY = 1.5f;
+            InvSizeX = 4;
+            InvSizeY = 6.5f;
 
 
             Glut.glutInit();
@@ -830,8 +848,8 @@ namespace DX
                 {
                     if (InvMenu)
                     {
-                        int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
-                        int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
+                        int X = ((MouseOnMatrixX - InvPosX - .5f) * 4f / 3f) >= 0 ? (int)((MouseOnMatrixX - InvPosX - .5f) * 4f / 3f) : -1;
+                        int Y = ((InvSizeY + InvPosY - 2f + 3f / 4f - MouseOnMatrixY) * 4f / 3f) >= 0 ? (int)((InvSizeY + InvPosY - 2f + 3f / 4f - MouseOnMatrixY) * 4f / 3f) : -1;
                         if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height)
                         {
                             player.Inventory.Activate((int)Y * player.Inventory.Width + (int)X);
@@ -840,12 +858,12 @@ namespace DX
                     }
                     if (player.DialogMenu&&player.LastNPC.Trade)
                     {
-                        int X = (int)((MouseOnMatrixX - 5.75f) * 4f / 3f);
-                        int Y = (int)((4f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
+                        int X = ((MouseOnMatrixX - 5.75f) * 4f / 3f)>=0? (int)((MouseOnMatrixX - 5.75f) * 4f / 3f):-1;
+                        int Y = ((4f + 3f / 4f - MouseOnMatrixY) * 4f / 3f) >= 0? (int)((4f + 3f / 4f - MouseOnMatrixY) * 4f / 3f) :-1 ;
 
-                        if (X >= 0 && X < 6 && Y >= 0 && Y < player.LastNPC.Goods.Length/6)
+                        if (X >= 0 && X < 6 && Y >= 0 && Y < player.LastNPC.Goods.Length/6+1)
                         {
-                            if (player.LastNPC.Goods != null)
+                            if (player.LastNPC.Goods!=null&&player.LastNPC.Goods[X+Y*6] != null)
                                 player.LastNPC.Sell(player, X + Y * 6);
                             return;
                         }
@@ -869,6 +887,12 @@ namespace DX
 
         private void AnT_KeyUp(object sender, KeyEventArgs e)
         {
+            if (e.KeyCode == Keys.Escape)
+            {
+                fullscreen = false;
+                this.FormBorderStyle = FormBorderStyle.Sizable;
+                this.WindowState = FormWindowState.Normal;
+            }
             if (e.KeyCode == Keys.F12) {
                 if (fullscreen) {
                     fullscreen = false;
@@ -897,21 +921,21 @@ namespace DX
                 {
                     if (e.KeyCode == Keys.G)
                     {
-                        int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
-                        int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
+                        int X = ((MouseOnMatrixX - InvPosX - .5f) * 4f / 3f) >= 0 ? (int)((MouseOnMatrixX - InvPosX - .5f) * 4f / 3f) : -1;
+                        int Y = ((InvSizeY + InvPosY - 2f + 3f / 4f - MouseOnMatrixY) * 4f / 3f) >= 0 ? (int)((InvSizeY + InvPosY - 2f + 3f / 4f - MouseOnMatrixY) * 4f / 3f) : -1;
                         if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height) player.Inventory.Items[(int)Y * player.Inventory.Width + (int)X] = null;
                     }
 
                     if (e.KeyCode == Keys.Y)
                     {
-                        int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
-                        int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
+                        int X = ((MouseOnMatrixX - InvPosX - .5f) * 4f / 3f) >= 0 ? (int)((MouseOnMatrixX - InvPosX - .5f) * 4f / 3f) : -1;
+                        int Y = ((InvSizeY + InvPosY - 2f + 3f / 4f - MouseOnMatrixY) * 4f / 3f) >= 0 ? (int)((InvSizeY + InvPosY - 2f + 3f / 4f - MouseOnMatrixY) * 4f / 3f) : -1;
                         if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height && player.Inventory.Items[(int)Y * player.Inventory.Width + (int)X] != null) player.Inventory.Drop((int)Y * player.Inventory.Width + (int)X);
                     }
                     if (e.KeyCode == Keys.T)
                     {
-                        int X = (int)((MouseOnMatrixX - 1.5f) * 4f / 3f);
-                        int Y = (int)((7f + 3f / 4f - MouseOnMatrixY) * 4f / 3f);
+                        int X = ((MouseOnMatrixX - InvPosX - .5f) * 4f / 3f) >= 0 ? (int)((MouseOnMatrixX - InvPosX - .5f) * 4f / 3f) : -1;
+                        int Y = ((InvSizeY + InvPosY - 2f + 3f / 4f - MouseOnMatrixY) * 4f / 3f) >= 0 ? (int)((InvSizeY + InvPosY - 2f + 3f / 4f - MouseOnMatrixY) * 4f / 3f) : -1;
                         if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height && player.Inventory.Items[(int)Y * player.Inventory.Width + (int)X] != null) player.Inventory.DropOne((int)Y * player.Inventory.Width + (int)X);
                     }
                 }
@@ -924,10 +948,19 @@ namespace DX
         }
 
         void MousePosOnAnt(out int X,out int Y, out float MouseOnMatrixX, out float MouseOnMatrixY) {
-            X = Form1.MousePosition.X - this.Location.X - 8;
-            Y = AnT.Height-(Form1.MousePosition.Y - this.Location.Y - 32);
-            MouseOnMatrixX = (float)X / (float)AnT.Width * (float)ScrW;
-            MouseOnMatrixY = (float)Y / (float)AnT.Height * (float)ScrH;
+            if (fullscreen) {
+                X = Form1.MousePosition.X - this.Location.X;
+                Y = AnT.Height - (Form1.MousePosition.Y - this.Location.Y);
+                MouseOnMatrixX = (float)X / (float)AnT.Width * (float)ScrW;
+                MouseOnMatrixY = (float)Y / (float)AnT.Height * (float)ScrH;
+            }
+            else
+            {
+                X = Form1.MousePosition.X - this.Location.X - 8;
+                Y = AnT.Height - (Form1.MousePosition.Y - this.Location.Y - 32);
+                MouseOnMatrixX = (float)X / (float)AnT.Width * (float)ScrW;
+                MouseOnMatrixY = (float)Y / (float)AnT.Height * (float)ScrH;
+            }
         }
 
         void MousePosOnMap() {

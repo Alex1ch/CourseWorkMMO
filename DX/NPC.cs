@@ -49,7 +49,7 @@ namespace DX
         public NPC(float X, float Y, string _name, string[] Textures, NPCClickFuncDel clickFunc, NPCCalcAnimDel calcAnim, NPCExMarkDel exMark, List<string> _dialogs, object[,] _goods)
         {
             vendor = true;
-            Goods = new Item[_goods.Length / 2];
+            goods = new Item[_goods.Length / 2];
             prices = new int[_goods.Length / 2];
             for (int i = 0; i < _goods.Length/2; i++) {
                 Goods[i] = (Item)_goods[i, 0];
@@ -141,11 +141,6 @@ namespace DX
             {
                 return name;
             }
-
-            set
-            {
-                name = value;
-            }
         }
 
         public bool Vendor
@@ -153,11 +148,6 @@ namespace DX
             get
             {
                 return vendor;
-            }
-
-            set
-            {
-                vendor = value;
             }
         }
 
@@ -167,9 +157,7 @@ namespace DX
             {
                 return trade;
             }
-
-            set
-            {
+            set {
                 trade = value;
             }
         }
@@ -193,11 +181,6 @@ namespace DX
             {
                 return prices;
             }
-
-            set
-            {
-                prices = value;
-            }
         }
 
         public Item[] Goods
@@ -205,11 +188,6 @@ namespace DX
             get
             {
                 return goods;
-            }
-
-            set
-            {
-                goods = value;
             }
         }
     }
