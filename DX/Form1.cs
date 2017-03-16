@@ -26,7 +26,7 @@ namespace DX
         NetGame connect;
         Random RNG;
 
-        
+        bool fullscreen=false;
 
         const int MAXPLAYERS = 200;
         const int MAXENEMY = 1000;
@@ -562,7 +562,7 @@ namespace DX
                 EnemyList[i].DeathCheck();
                 //EnemyList[i].WorkFunc(AllPlayers,DropList,RNG);
             }
-            textBox3.Text = "";
+            //textBox3.Text = "";
         }
 
 
@@ -869,6 +869,18 @@ namespace DX
 
         private void AnT_KeyUp(object sender, KeyEventArgs e)
         {
+            if (e.KeyCode == Keys.F12) {
+                if (fullscreen) {
+                    fullscreen = false;
+                    this.FormBorderStyle = FormBorderStyle.Sizable;
+                    this.WindowState = FormWindowState.Normal;
+                } else
+                {
+                    fullscreen = true;
+                    this.FormBorderStyle = FormBorderStyle.None;
+                    this.WindowState = FormWindowState.Maximized;
+                }
+            }
             if (!LoginScreen && player != null)
             {
                 if (e.KeyCode == Keys.E)
@@ -1088,7 +1100,7 @@ namespace DX
                     return;
                 }
 
-                if (connect.LogAndGame(char_name, 200, 5))
+                if (connect.LogAndGame(char_name, 50, 30))
                 {
                     textBox1.Enabled = false;
                     textBox2.Enabled = false;

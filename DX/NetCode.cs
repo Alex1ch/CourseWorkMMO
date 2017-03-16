@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Text;
 
 using System.Net;
@@ -10,10 +10,6 @@ using System.Threading.Tasks;
 
 namespace DX
 {
-    /*
-   1) В Parse_CharsXYD обьект нового игрока передается когда не все его параметры инициализированы
-   2) Менять направление на false сразу в свойствах класса игрока? 
-    */
     class Cons
     {
         /// <summary>
@@ -83,7 +79,9 @@ namespace DX
             float X = BitConverter.ToSingle(x, 0);
             float Y = BitConverter.ToSingle(y, 0);
 
-            if (false&&X == float.MinValue || Y == float.MinValue) return;
+            Console.WriteLine("X:"+X+" Y:"+Y);
+
+            if (X == float.MinValue || Y == float.MinValue) return;
 
             player.X = X;
             player.Y = Y;
@@ -335,7 +333,6 @@ namespace DX
         }
     }
 
-
     class NetGame
     {
         Player[] Players;
@@ -358,12 +355,8 @@ namespace DX
         static bool available_port = false;   //Для обозначения того, что нашелся ли свободный порт для клиента
         static bool IsExit = false; //Происходит отключение или нет
 
-        //Сколько раз неудалось подключиться
-        static public int cfl = 0;
-        public int CFL { get { return cfl; } }
-
         //Полученное от сервера сообщение
-        static private string rec_msg = "";
+        static private string rec_msg = "null";
         public string Recv_Msg
         {
             get
@@ -374,21 +367,11 @@ namespace DX
             }
         }
 
-        //Старт сессии
-        static private string start_msg = "";
-        public string Start_Msg
-        {
-            get
-            {
-                string copy = start_msg;
-                start_msg = "";
-                return copy;
-            }
-        }
-        byte[] start_info;
+        byte[] start_info = new byte[256];
         public string denied_info = "Error while logging";
+
         //Cтатус выхода
-        static private string exit_status = "";
+        static private string exit_status = "null";
         public string Exit_Status
         {
             get
@@ -400,17 +383,7 @@ namespace DX
         }
 
         //Имя персонажа данного клиента
-        static private string char_name = "";
-
-        //Координаты персонажа клиента (0-нету, 1-право, 2-вверх, 3- влево, 4-вниз)
-        static float[] Player_XYD = new float[] { 55.5F, 55.5F, 4F };
-        public float[] Get_XYD
-        {
-            get
-            {
-                return Player_XYD;
-            }
-        }
+        static private string char_name = "null";
 
         //IP, Port
         public NetGame(string IP, int Log_Port, int Game_Port, int My_Port, ref Player[] dict)
@@ -476,7 +449,7 @@ namespace DX
 
         //Проверяет на возможность подключения
         //Interval - время, между отправкой и получением пакета (1000 = 1сек)
-        public bool IsConnectable(int Sleep_Interval = 200, int Attempts = 5)
+        public bool IsConnectable(int Sleep_Interval = 100, int Attempts = 5)
         {
             //Если не установлен ЮДП
             if (available_port == false) { Console.WriteLine("UDP client not set"); return false; }
@@ -523,7 +496,7 @@ namespace DX
         }
 
         //Устанавливаем сессию с заданным именем
-        public bool LogAndGame(string Char_Name, int Sleep_Interval = 200, int Attempts = 5)
+        public bool LogAndGame(string Char_Name, int Sleep_Interval = 100, int Attempts = 30)
         {
             if (available_port == false) { Console.WriteLine("[LogAndGame]: UDP client not set"); return false; }
 
@@ -549,19 +522,16 @@ namespace DX
                 Send(2, Char_Name, login_addr); // BEGIN
                 Thread.Sleep(Sleep_Interval);
 
-                switch (Start_Msg)
-                {
-                    case "STARTED":
-                        IsExit = false;
-                        session_ON = true;
-                        Console.WriteLine("Started session, my ID: " + Cons.GetData(start_info));
-                        Send(5, "OK" + Cons.GetData(start_info), login_addr);
+                if (session_ON)
+                { 
+                        IsExit = false;         
+                        Console.WriteLine("Started session, my ID: " + Cons.GetData(start_info));                      
                         return true;
-                    case "DENIED": return false;
                 }
-            }
+           }
             return false;
         }
+            
 
         // Для остановкм слушания
         public bool End_Session(int Sleep_Interval = 200, int Attempts = 5)
@@ -617,7 +587,6 @@ namespace DX
                 {
                     ipendpoint = null;
                     msg = client_udp.Receive(ref ipendpoint);
-
                     //Console.WriteLine("Received:  " + Cons.GetData(msg));
 
                     //Реакция если сообщение получено только с гейм или лог сервера
@@ -630,54 +599,76 @@ namespace DX
                             case 255:
                                 rec_msg = "ALIVE";
                                 break;
+
                             //Сервер сообщает о старте Сессии   
                             case 254:
-                                start_info = msg;
-                                start_msg = "STARTED";
+                                if (session_ON == true) continue;
                                 Console.WriteLine("Received:  " + Cons.GetData(msg));
+                                session_ON = true;
+                                Send(5, "OK", login_addr);
+                                start_info = msg;                                                 
                                 break;
+
                             //Отказ сервером начать сессию
                             case 253:
-                                Console.WriteLine("Can't start session: " + Cons.GetData(msg));
+                                if (session_ON == true) { break; }
+                                session_ON = false;
+                                Console.WriteLine("Can't start session: "+ Cons.GetData(msg));
                                 denied_info = Cons.GetData(msg);
-                                rec_msg = "DENIED";
                                 break;
+
                             //Уведомление сервером о том, что сессия успешно завершена 
                             case 252:
                                 Console.WriteLine("Exit message: " + Cons.GetData(msg));
                                 //Проверка, чтобы не завершить сессию по какой-либо ошибке
                                 if (IsExit) exit_status = "SUCCESSFUL";
                                 break;
+
                             //Сервер присылает координаты всех чаров и их имен
                             case 251://CH_XYD
+                                if (!session_ON) break;
                                 // вытаскиваю имя перса из пакета
                                 string name = Cons.GetName18b(msg);
                                 //Если в пакете есть имя перса клиента
-                                if (name == char_name) Cons.Parse_MyXYD(Players[0], msg);
-                                else { Cons.Parse_CharsXYD(ref Players, msg); }
+                                if (name != char_name) 
+                                 Cons.Parse_CharsXYD(ref Players, msg);
                                 break;
-                            case 250://PLAYER_INFO	| 1[lvl] 2-5[maxHP] 6-end[charname]	
+
+                            //PLAYER_INFO	| 1[lvl] 2-5[maxHP] 6-end[charname]	
+                            case 250:
                                 break;
-                            case 249:// PLAYER_END | [charname]
+
+                            // PLAYER_END | [charname]
+                            case 249:
+                                if (!session_ON) break;
                                 string data = Cons.GetData(msg);
                                 Console.WriteLine("Player END: " + data);
                                 Send(6, "OK" + data, game_addr);
                                 Cons.DeletePlayer(ref Players, data);
                                 break;
+
                             case 248:
+                                if (!session_ON) break;
                                 Cons.Parse_MobsXYD(ref Mobs, msg);
                                 break;
+
                             case 247:
+                                if (!session_ON) break;
                                 string data8 = Cons.GetData(msg);
                                 Send(8, "OK" + data8, game_addr);
                                 Console.WriteLine("Adding item: " + Cons.Parse_DropItems(ref Items, msg));
+                                break;
+
+                            case 246:
+                                if (!session_ON) break;
+                                Cons.Parse_MyXYD(Players[0], msg);
                                 break;
                         }
                     }
                 }
             }
             catch (Exception ex)
-            {
+            { 
                 //Если произошла ошибка перезапуск
                 if (listen) Listener();
             }
@@ -716,6 +707,7 @@ namespace DX
             }
         }
 
+        Stopwatch time = Stopwatch.StartNew();
         //Отправить серверу координаты персонажа 
         public bool SendXYD(float X, float Y, float Rotation, byte Direction)
         {
@@ -726,7 +718,10 @@ namespace DX
                 return false;
             }
 
-            byte[] Xb = BitConverter.GetBytes(X);//кодируем флоат в массив байтов 
+            if (time.ElapsedMilliseconds <= 10) {  return false; }
+            time.Restart();
+
+            byte[] Xb = BitConverter.GetBytes(X);
             byte[] Yb = BitConverter.GetBytes(Y);
             byte[] Rotb = BitConverter.GetBytes(Rotation);
             //byte[] HPb = BitConverter.GetBytes(HP);
@@ -745,7 +740,6 @@ namespace DX
             return true;
         }
 
-        //Удар
         //HIT  | 0[type of attack] 1-4[x] 5-8[y] 9[npc or player] 10-13[id or name]
         public bool SendHit(byte type_hit, float x, float y, byte who_hit, int id)
         {
