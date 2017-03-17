@@ -30,8 +30,8 @@ namespace DX
 
             if (Math.Abs(sX - x) > 0.05 || Math.Abs(sY - y) > 0.05)
             {
-                x += (sX - x) * 0.15f;
-                y += (sY - y) * .15f;
+                x += (sX - x) * 0.08f;
+                y += (sY - y) * .08f;
             }
             else
             {

@@ -75,8 +75,8 @@ namespace DX
         public void Interpolation() {
             if (Math.Abs(sX - x) > basespeed || Math.Abs(sY - y) > basespeed)
             {
-                x += (sX - x) * basespeed*3;
-                y += (sY - y) * basespeed*3;
+                x += (sX - x) * basespeed*4;
+                y += (sY - y) * basespeed*4;
             }
             else {
                 return; }

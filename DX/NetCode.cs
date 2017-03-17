@@ -156,28 +156,28 @@ namespace DX
                     player.RIGHT = false;
                     player.DOWN = false;
                 }
-                if (d == 1)
+                if (d == 1||d==2||d==8)
                 {
                     player.LEFT = false;
                     player.UP = false;
                     player.DOWN = false;
                     player.RIGHT = true;
                 }
-                if (d == 2)
+                if (d == 3)
                 {
                     player.LEFT = false;
                     player.RIGHT = false;
                     player.DOWN = false;
                     player.UP = true;
                 }
-                if (d == 3)
+                if (d == 5||d==6||d==4)
                 {
                     player.UP = false;
                     player.RIGHT = false;
                     player.DOWN = false;
                     player.LEFT = true;
                 }
-                if (d == 4)
+                if (d == 7)
                 {
                     player.LEFT = false;
                     player.UP = false;
@@ -201,28 +201,28 @@ namespace DX
                     player.RIGHT = false;
                     player.DOWN = false;
                 }
-                if (d == 1)
+                if (d == 1 || d == 2 || d == 8)
                 {
                     player.LEFT = false;
                     player.UP = false;
                     player.DOWN = false;
                     player.RIGHT = true;
                 }
-                if (d == 2)
+                if (d == 3)
                 {
                     player.LEFT = false;
                     player.RIGHT = false;
                     player.DOWN = false;
                     player.UP = true;
                 }
-                if (d == 3)
+                if (d == 5 || d == 6 || d == 4)
                 {
                     player.UP = false;
                     player.RIGHT = false;
                     player.DOWN = false;
                     player.LEFT = true;
                 }
-                if (d == 4)
+                if (d == 7)
                 {
                     player.LEFT = false;
                     player.UP = false;
