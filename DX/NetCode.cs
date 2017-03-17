@@ -62,6 +62,8 @@ namespace DX
         //Заносим в координаты в переменную перса клиента
         public static void Parse_MyXYD(Player player, byte[] msg)
         {
+            if (player == null) return;
+
             byte[] x = new byte[4];
             byte[] y = new byte[4];
             byte[] r = new byte[4];
@@ -74,17 +76,12 @@ namespace DX
             d = msg[13];
             Array.Copy(msg, 14, hp, 0, 4);
 
-            player.Hp = BitConverter.ToSingle(hp, 0);
-
             float X = BitConverter.ToSingle(x, 0);
             float Y = BitConverter.ToSingle(y, 0);
+            player.Hp = BitConverter.ToSingle(hp, 0);
 
-            Console.WriteLine("X:"+X+" Y:"+Y);
-
-            if (X == float.MinValue || Y == float.MinValue) return;
-
-            player.X = X;
-            player.Y = Y;
+            player.SX = X;
+            player.SY = Y;
 
             player.Rotation = BitConverter.ToSingle(r, 0);
             if (d == 0)
@@ -293,6 +290,8 @@ namespace DX
         //247		DROP_SET 	| 1-4[x] 5-8[y] 9-12[item] 13-16[quantity]
         public static bool Parse_DropItems(ref List<Item> Items, byte[] msg)
         {
+            if (Items == null) { Console.WriteLine("Empty items list"); return false; }
+
             byte[] xb = new byte[4];
             byte[] yb = new byte[4];
             byte[] itemb = new byte[4];
@@ -306,25 +305,34 @@ namespace DX
             Array.Copy(msg, 17, idb, 0, 4);
 
             int item = BitConverter.ToInt32(itemb, 0);
-            Items.Find(i => i.Id_exemplar == BitConverter.ToInt32(idb, 0));
+            int exemplar = BitConverter.ToInt32(idb, 0);
 
+            if (Items != null)
+            {
+                //Console.WriteLine("Items count: " + Items.Count);
+                for (int i = 0; i < Items.Count; i++)
+                {
+                    if (Items[i] != null)
+                        if (Items[i].Id_exemplar == exemplar) return false;
+                }
+            }
 
             switch (item)
             {
                 case 0:
-                    Console.WriteLine("Health");
-                     Items.Add(new Potion(PotionType.Health,BitConverter.ToInt32(quantityb,0),BitConverter.ToSingle(xb,0),BitConverter.ToSingle(yb,0), BitConverter.ToInt32(idb, 0)));
+                    //Console.WriteLine("Health");
+                    Items.Add(new Potion(PotionType.Health, BitConverter.ToInt32(quantityb, 0), BitConverter.ToSingle(xb, 0), BitConverter.ToSingle(yb, 0), BitConverter.ToInt32(idb, 0)));
                     return true;
                 case 1:
-                    Console.WriteLine("Speed");
+                    //Console.WriteLine("Speed");
                     Items.Add(new Potion(PotionType.Speed, BitConverter.ToInt32(quantityb, 0), BitConverter.ToSingle(xb, 0), BitConverter.ToSingle(yb, 0), BitConverter.ToInt32(idb, 0)));
                     return true;
                 case 2:
-                    Console.WriteLine("Energy");
+                    //Console.WriteLine("Energy");
                     Items.Add(new Potion(PotionType.Energy, BitConverter.ToInt32(quantityb, 0), BitConverter.ToSingle(xb, 0), BitConverter.ToSingle(yb, 0), BitConverter.ToInt32(idb, 0)));
                     return true;
                 case 69:
-                    Console.WriteLine("Gold");
+                    //Console.WriteLine("Gold");
                     Items.Add(new Gold(BitConverter.ToSingle(xb, 0), BitConverter.ToSingle(yb, 0), BitConverter.ToInt32(quantityb, 0), BitConverter.ToInt32(idb, 0)));
                     return true;
                 default:
@@ -351,7 +359,7 @@ namespace DX
 
         static Thread thrListen;              //поток для прослушки
         static bool listen = false;           //true чтобы прервать while в прослушке   
-        static bool session_ON = false;       //Индикатор того запущена сессия с сервером или нет
+        public bool session_ON = false;       //Индикатор того запущена сессия с сервером или нет
         static bool available_port = false;   //Для обозначения того, что нашелся ли свободный порт для клиента
         static bool IsExit = false; //Происходит отключение или нет
 
@@ -385,23 +393,7 @@ namespace DX
         //Имя персонажа данного клиента
         static private string char_name = "null";
 
-        //IP, Port
-        public NetGame(string IP, int Log_Port, int Game_Port, int My_Port, ref Player[] dict)
-        {
-            Players = dict;
-            log_port = Log_Port;
-            game_port = Game_Port;
-            my_port = My_Port;
-            ip = IP;
-
-            //Ищем свободный порт
-            if (Parse_Port()) available_port = true;
-            Console.WriteLine("Connected to port: " + my_port);
-
-            //Адреса логин и гейм серва
-            login_addr = new IPEndPoint(IPAddress.Parse(ip), log_port);
-            game_addr = new IPEndPoint(IPAddress.Parse(ip), game_port);
-        }
+        Dictionary<byte, string> Permissions = new Dictionary<byte, string>(255);
 
         //Только с использованием Set_Addr, Расчитано на много попыток подключения (под разными имеми и аддресами)
         public NetGame(int My_Port, ref Player[] dict, ref Enemy[] enemyd, ref List<Item> items)
@@ -411,6 +403,8 @@ namespace DX
             Items = items;
 
             my_port = My_Port;
+
+            for (int i = 0; i < 255; i++) Permissions.Add((byte)i, null);
 
             //Ищем свободный порт
             if (Parse_Port()) available_port = true;
@@ -437,6 +431,11 @@ namespace DX
                 try
                 {
                     client_udp = new UdpClient(i);
+                    uint IOC_IN = 0x80000000;
+                    uint IOC_VENDOR = 0x18000000;
+                    uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+                    client_udp.Client.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
+
                     my_port = i;
                     my_addr = new IPEndPoint(IPAddress.Parse("127.0.0.1"), my_port);
                     available_port = true;
@@ -469,7 +468,7 @@ namespace DX
                 listen = false;
                 Console.WriteLine("[Connection check] Catch: " + e.Message);
                 Send(100, "", my_addr);
-                //thrListen.Abort();d
+                //thrListen.Abort();
                 thrListen.Join(1);
                 return false;
             }
@@ -486,12 +485,12 @@ namespace DX
                 if (Recv_Msg == "ALIVE")
                 {
                     listen = false;
-                    thrListen.Abort();
+                    thrListen.Join(1);
                     return true;
                 }
             }
             listen = false;
-            thrListen.Abort();
+            thrListen.Join(1);
             return false;
         }
 
@@ -523,15 +522,15 @@ namespace DX
                 Thread.Sleep(Sleep_Interval);
 
                 if (session_ON)
-                { 
-                        IsExit = false;         
-                        Console.WriteLine("Started session, my ID: " + Cons.GetData(start_info));                      
-                        return true;
+                {
+                    IsExit = false;
+                    Console.WriteLine("Started session, my ID: " + Cons.GetData(start_info));
+                    return true;
                 }
-           }
+            }
             return false;
         }
-            
+
 
         // Для остановкм слушания
         public bool End_Session(int Sleep_Interval = 200, int Attempts = 5)
@@ -606,14 +605,14 @@ namespace DX
                                 Console.WriteLine("Received:  " + Cons.GetData(msg));
                                 session_ON = true;
                                 Send(5, "OK", login_addr);
-                                start_info = msg;                                                 
+                                start_info = msg;
                                 break;
 
                             //Отказ сервером начать сессию
                             case 253:
-                                if (session_ON == true) { break; }
+                                if (session_ON == true) break;
                                 session_ON = false;
-                                Console.WriteLine("Can't start session: "+ Cons.GetData(msg));
+                                Console.WriteLine("Can't start session: " + Cons.GetData(msg));
                                 denied_info = Cons.GetData(msg);
                                 break;
 
@@ -630,15 +629,15 @@ namespace DX
                                 // вытаскиваю имя перса из пакета
                                 string name = Cons.GetName18b(msg);
                                 //Если в пакете есть имя перса клиента
-                                if (name != char_name) 
-                                 Cons.Parse_CharsXYD(ref Players, msg);
+                                if (name != char_name)
+                                    Cons.Parse_CharsXYD(ref Players, msg);
                                 break;
 
                             //PLAYER_INFO	| 1[lvl] 2-5[maxHP] 6-end[charname]	
                             case 250:
                                 break;
 
-                            // PLAYER_END | [charname]
+                            //249		PLAYER_END	| 1-end[charname]
                             case 249:
                                 if (!session_ON) break;
                                 string data = Cons.GetData(msg);
@@ -647,28 +646,37 @@ namespace DX
                                 Cons.DeletePlayer(ref Players, data);
                                 break;
 
+                            //248		MOB_XYD		| 1-4[x] 5-8[y] 9-12[rotation] 13[d] 14-17[hp] 18-21[type] 22-end[id]
                             case 248:
                                 if (!session_ON) break;
                                 Cons.Parse_MobsXYD(ref Mobs, msg);
                                 break;
 
+                            //247		DROP_SET 	| 1-4[x] 5-8[y] 9-12[item] 13-16[quantity] 17-end[id_ex]
                             case 247:
                                 if (!session_ON) break;
                                 string data8 = Cons.GetData(msg);
-                                Send(8, "OK" + data8, game_addr);
-                                Console.WriteLine("Adding item: " + Cons.Parse_DropItems(ref Items, msg));
+                                Cons.Parse_DropItems(ref Items, msg);
                                 break;
 
+                            //246 	SEND_MYXYD	| 1-4[x] 5-8[y] 9-12[rotation] 13[d] 14-17[hp] 17-end[char_name]
                             case 246:
                                 if (!session_ON) break;
                                 Cons.Parse_MyXYD(Players[0], msg);
+                                break;
+
+                            //245		PICK_UP_OK	| 1-end["OK"+same_data]
+                            case 245:
+                                Console.WriteLine("245::" + Cons.GetData(msg));
+                                Permissions[245] = Cons.GetData(msg);
                                 break;
                         }
                     }
                 }
             }
             catch (Exception ex)
-            { 
+            {
+                Console.WriteLine("Listener exception: " + ex.ToString());
                 //Если произошла ошибка перезапуск
                 if (listen) Listener();
             }
@@ -707,6 +715,39 @@ namespace DX
             }
         }
 
+        public async Task<bool> SendS(byte command, byte[] msg, IPEndPoint addr)
+        {
+            byte[] s_packet = new byte[1 + msg.Length];
+            for (int i = 1; i < msg.Length + 1; i++) s_packet[i] = msg[i - 1];
+            s_packet[0] = command;
+
+            byte callback_cmd;
+            switch (command) { case 8: callback_cmd = 245; break; default: return false; }
+
+            try
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    Console.WriteLine("SENDS:[" + i + "] To:" + addr + " Message:[" + Encoding.UTF8.GetString(msg) + "]");
+
+                    client_udp.Send(s_packet, s_packet.Length, addr);
+                    await Task.Delay(50);
+
+                    Console.WriteLine(" Received:[" + Permissions[callback_cmd] + "]");
+
+                    if (Permissions[callback_cmd] == "OK" + Encoding.UTF8.GetString(msg)) { Permissions[callback_cmd] = null; return true; }
+                    else if (Permissions[callback_cmd] == "NO" + Encoding.UTF8.GetString(msg)) { Permissions[callback_cmd] = null; return false; }
+                }
+                Permissions[callback_cmd] = null;
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Game serv: SendS exception: To::" + addr + "::" + ex.ToString());
+                return false;
+            }
+        }
+
         Stopwatch time = Stopwatch.StartNew();
         //Отправить серверу координаты персонажа 
         public bool SendXYD(float X, float Y, float Rotation, byte Direction)
@@ -717,9 +758,6 @@ namespace DX
                 Console.WriteLine("Cant send XYD, try to start session before");
                 return false;
             }
-
-            if (time.ElapsedMilliseconds <= 10) {  return false; }
-            time.Restart();
 
             byte[] Xb = BitConverter.GetBytes(X);
             byte[] Yb = BitConverter.GetBytes(Y);
@@ -764,6 +802,26 @@ namespace DX
 
             Send(7, output, game_addr);
             return true;
+        }
+
+        //8		DROP_TAKEN  | 1-4[id] 5-8[ex_id]
+        public async Task<bool> Take_Drop(int ID, int Ex_ID)
+        {
+            //Если сессия не установлена, то отправить сообщение такого рода нельзя
+            if (!session_ON)
+            {
+                Console.WriteLine("Cant Take Drop, try to start session before");
+                return false;
+            }
+
+            byte[] output = new byte[4 + 4];
+            byte[] id = BitConverter.GetBytes(ID);
+            byte[] ex = BitConverter.GetBytes(Ex_ID);
+
+            Array.Copy(id, 0, output, 0, 4);
+            Array.Copy(ex, 0, output, 4, 4);
+
+            return await SendS(8, output, game_addr);
         }
     }
 

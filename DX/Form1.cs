@@ -29,7 +29,7 @@ namespace DX
         float InvPosX, InvPosY, InvSizeX, InvSizeY;
         float QuestPosX, QuestPosY, QuestSizeX, QuestSizeY;
 
-        bool fullscreen=false;
+        bool fullscreen = false;
 
         const int MAXPLAYERS = 200;
         const int MAXENEMY = 1000;
@@ -37,9 +37,9 @@ namespace DX
         string LoginScreenErr = "";
 
         Dictionary<string, int> Textures;
-        Enemy[] EnemyList=new Enemy[MAXENEMY];
-        Player[] PlayersList=new Player[MAXPLAYERS];
-        List<Item> DropList;
+        Enemy[] EnemyList = new Enemy[MAXENEMY];
+        Player[] PlayersList = new Player[MAXPLAYERS];
+        List<Item> DropList = new List<Item>();
         List<Player> AllPlayers;
         List<NPC> NPCList;
 
@@ -84,7 +84,8 @@ namespace DX
             // Отрисовка окружения
 
 
-            for (int i = (int)player.X-8; i < player.X + 8; i ++) {
+            for (int i = (int)player.X - 8; i < player.X + 8; i++)
+            {
                 for (int j = (int)player.Y - 5; j < player.Y + 5; j++)
                 {
                     if (!player.Alive) Gl.glColor3f(.5f, .5f, .5f);
@@ -122,11 +123,11 @@ namespace DX
 
 
             //отрисовка героя
-            
+
 
             MousePosOnAnt(out MouseX, out MouseY, out MouseOnMatrixX, out MouseOnMatrixY);
 
-            Gl.glColor3f(1,1,1);
+            Gl.glColor3f(1, 1, 1);
 
             Gl.glPushMatrix();
 
@@ -140,7 +141,7 @@ namespace DX
             }
             else
             {
-                Gl.glRotatef(90f,0,0,1);
+                Gl.glRotatef(90f, 0, 0, 1);
                 Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["IdleR"]);
             }
             Gl.glPopMatrix();
@@ -151,28 +152,28 @@ namespace DX
 
             //
             //
-            
-            for(int i=1;i<PlayersList.Length;i++)
+
+            for (int i = 1; i < PlayersList.Length; i++)
             {
                 if (PlayersList[i] == null) continue;
                 if (Math.Sqrt((player.X - PlayersList[i].X) * (player.X - PlayersList[i].X) + (player.Y - PlayersList[i].Y) * (player.Y - PlayersList[i].Y)) > 11f) continue;
                 PlayersList[i].CalcAnim();
                 if (PlayersList[i].Alive)
                 {
-                    Console.WriteLine(PlayersList[i].Name + " " + PlayersList[i].X + " " + PlayersList[i].Y);
+                    //Console.WriteLine(PlayersList[i].Name + " " + PlayersList[i].X + " " + PlayersList[i].Y);
                     DrawStringCent(PlayersList[i].X - 2, PlayersList[i].X + 2, PlayersList[i].Y + 1.3f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, PlayersList[i].Name, 1, 1, 1, true);
                     Gl.glColor3f(0f, 0f, 0f);
                     Draw2DText(PlayersList[i].X - .45f, PlayersList[i].Y + 1.1f, -3, .9f, .15f, Textures["HPBAR"]);
                     Gl.glColor3f(1f, 0f, 0f);
                     Draw2DText(PlayersList[i].X - .45f, PlayersList[i].Y + 1.1f, -3, .9f / PlayersList[i].MaxHp * PlayersList[i].Hp, .15f, Textures["HPBAR"]);
                     Gl.glColor3f(1, 1, 1);
-                    Draw2DTextCent(PlayersList[i].X, PlayersList[i].Y+0.6f, OnScreenYtoZ(PlayersList[i].Y), 1.5f, 1.5f, Textures[PlayersList[i].Texture]);
+                    Draw2DTextCent(PlayersList[i].X, PlayersList[i].Y + 0.6f, OnScreenYtoZ(PlayersList[i].Y), 1.5f, 1.5f, Textures[PlayersList[i].Texture]);
                 }
                 else
                 {
                     Gl.glRotatef(90f, 0, 0, 1);
                     DrawStringCent(PlayersList[i].X - 2, PlayersList[i].X + 2, PlayersList[i].Y + .9f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, PlayersList[i].Name, 1, 1, 1, true);
-                    Draw2DTextCent(PlayersList[i].X, PlayersList[i].Y+0.6f, OnScreenYtoZ(PlayersList[i].Y), 1.5f, 1.5f, Textures["IdleR"]);
+                    Draw2DTextCent(PlayersList[i].X, PlayersList[i].Y + 0.6f, OnScreenYtoZ(PlayersList[i].Y), 1.5f, 1.5f, Textures["IdleR"]);
                 }
             }
 
@@ -195,7 +196,7 @@ namespace DX
                 {
                     if (!player.Alive) Gl.glColor3f(.5f, .5f, .5f);
                     else Gl.glColor3f(1f, 1f, 1f);
-                    Draw2DTextCent(enemy.X, enemy.Y+.6f, OnScreenYtoZ(enemy.Y), 1.2f, 1.2f, Textures[enemy.Texture]);
+                    Draw2DTextCent(enemy.X, enemy.Y + .6f, OnScreenYtoZ(enemy.Y), 1.2f, 1.2f, Textures[enemy.Texture]);
                     Gl.glColor3f(0f, 0f, 0f);
                     Draw2DText(enemy.X - .6f, enemy.Y + 1.25f, -3, .9f, .15f, Textures["HPBAR"]);
                     Gl.glColor3f(1f, 0f, 0f);
@@ -207,11 +208,12 @@ namespace DX
             //Отрисовка NPC
 
 
-            foreach (NPC npc in NPCList) {
+            foreach (NPC npc in NPCList)
+            {
                 Gl.glColor3f(1, 1, 1);
                 Draw2DTextCent(npc.X, npc.Y + .6f, OnScreenYtoZ(npc.Y), 1.5f, 1.5f, Textures[npc.CalcAnim(npc)]);
-                DrawStringCent(npc.X-2,npc.X+2, npc.Y + 1.2f,-3.1f,Glut.GLUT_BITMAP_HELVETICA_12,npc.Name,1,1,1,true);
-                if (npc.ExMark(player)) Draw2DTextCent(npc.X, npc.Y+1.75f, -2, .7f, .7f, Textures["ExMark"]);
+                DrawStringCent(npc.X - 2, npc.X + 2, npc.Y + 1.2f, -3.1f, Glut.GLUT_BITMAP_HELVETICA_12, npc.Name, 1, 1, 1, true);
+                if (npc.ExMark(player)) Draw2DTextCent(npc.X, npc.Y + 1.75f, -2, .7f, .7f, Textures["ExMark"]);
             }
 
 
@@ -224,18 +226,20 @@ namespace DX
             //Инвентарь
             if (InvMenu)
             {
-                string quantitystr="";
+                string quantitystr = "";
                 Gl.glColor3f(.3f, .15f, 0);
-                Draw2DText(InvPosX,InvPosY,-3.5f,InvSizeX,InvSizeY,Textures["Menu"]);
+                Draw2DText(InvPosX, InvPosY, -3.5f, InvSizeX, InvSizeY, Textures["Menu"]);
                 Gl.glLoadIdentity();
-                DrawStringCent(InvPosX,InvPosX+InvSizeX, InvPosY+InvSizeY-.75f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, "Inventory", 1f, 1f, 1f, true);
-                for (int i = 0; i < player.Inventory.Size; i++) {
+                DrawStringCent(InvPosX, InvPosX + InvSizeX, InvPosY + InvSizeY - .75f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, "Inventory", 1f, 1f, 1f, true);
+                for (int i = 0; i < player.Inventory.Size; i++)
+                {
                     Gl.glColor3f(1, 1, 1);
-                    Draw2DText(InvPosX+.5f+i%player.Inventory.Width*3f/4f,
-                               InvSizeY+InvPosY-2f-(i-i%player.Inventory.Width)/player.Inventory.Width * 3f / 4f,
-                               -3.5f, 3f/4f,3f/4f,
+                    Draw2DText(InvPosX + .5f + i % player.Inventory.Width * 3f / 4f,
+                               InvSizeY + InvPosY - 2f - (i - i % player.Inventory.Width) / player.Inventory.Width * 3f / 4f,
+                               -3.5f, 3f / 4f, 3f / 4f,
                                Textures["ItemBG"]);
-                    if (player.Inventory.Items[i] != null) {
+                    if (player.Inventory.Items[i] != null)
+                    {
                         Draw2DText(InvPosX + .5f + i % player.Inventory.Width * 3f / 4f,
                                    InvSizeY + InvPosY - 2f - (i - i % player.Inventory.Width) / player.Inventory.Width * 3f / 4f,
                                    -3.5f, 3f / 4f, 3f / 4f,
@@ -259,46 +263,47 @@ namespace DX
                                 quantitystr = (quantity / 1000000).ToString() + "kk";
                             }
                             else quantitystr = quantity.ToString();
-                            DrawStringFromRight(InvPosX+.5f+ 3f/4f+i % player.Inventory.Width * 3f / 4f ,
+                            DrawStringFromRight(InvPosX + .5f + 3f / 4f + i % player.Inventory.Width * 3f / 4f,
                                    InvSizeY + InvPosY - 2f - (i - i % player.Inventory.Width) / player.Inventory.Width * 3f / 4f,
                                    -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, quantitystr,
                                    1, 1, 1, true);
                         }
                 }
 
-                int X = ((MouseOnMatrixX - InvPosX - .5f) * 4f / 3f)>=0? (int)((MouseOnMatrixX - InvPosX - .5f) * 4f / 3f):-1;
-                int Y = ((InvSizeY + InvPosY - 2f + 3f / 4f - MouseOnMatrixY) * 4f / 3f)>=0? (int)((InvSizeY + InvPosY - 2f + 3f / 4f - MouseOnMatrixY) * 4f / 3f):-1;
-                if ( X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height&&player.Inventory.Items[Y * player.Inventory.Width + X] != null)
+                int X = ((MouseOnMatrixX - InvPosX - .5f) * 4f / 3f) >= 0 ? (int)((MouseOnMatrixX - InvPosX - .5f) * 4f / 3f) : -1;
+                int Y = ((InvSizeY + InvPosY - 2f + 3f / 4f - MouseOnMatrixY) * 4f / 3f) >= 0 ? (int)((InvSizeY + InvPosY - 2f + 3f / 4f - MouseOnMatrixY) * 4f / 3f) : -1;
+                if (X >= 0 && X < player.Inventory.Width && Y >= 0 && Y < player.Inventory.Height && player.Inventory.Items[Y * player.Inventory.Width + X] != null)
                 {
-                    
-                    float Width = Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_18, player.Inventory.Items[Y * player.Inventory.Width + X].Name ) * ScaleW
+
+                    float Width = Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_18, player.Inventory.Items[Y * player.Inventory.Width + X].Name) * ScaleW
                         >= Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_12, player.Inventory.Items[Y * player.Inventory.Width + X].Desc + "\n\nQuantity:" + player.Inventory.Items[Y * player.Inventory.Width + X].Quantity.ToString()) * ScaleW ?
-                        Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_18, player.Inventory.Items[Y * player.Inventory.Width + X].Name) * ScaleW:
+                        Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_18, player.Inventory.Items[Y * player.Inventory.Width + X].Name) * ScaleW :
                         Glut.glutBitmapLength(Glut.GLUT_BITMAP_HELVETICA_12, player.Inventory.Items[Y * player.Inventory.Width + X].Desc + "\n\nQuantity:" + player.Inventory.Items[Y * player.Inventory.Width + X].Quantity.ToString()) * ScaleW;
                     float Height = Glut.glutBitmapHeight(Glut.GLUT_BITMAP_HELVETICA_12) * ScaleH;
                     int lines = 1;
                     string outputdesc = player.Inventory.Items[Y * player.Inventory.Width + X].Desc + "\n\nQuantity:" + player.Inventory.Items[Y * player.Inventory.Width + X].Quantity.ToString();
-                    for (int i = 0; i < outputdesc.Length; i++) {
+                    for (int i = 0; i < outputdesc.Length; i++)
+                    {
                         if (outputdesc[i] == '\n') lines++;
                     }
-                    Gl.glColor4f(.3f, .15f, 0,1);
-                    Draw2DText(MouseOnMatrixX+.5f,MouseOnMatrixY-Height*lines-.4f,-4.5f,Width+.2f, Height*lines + .4f,Textures["DescBG"]);
+                    Gl.glColor4f(.3f, .15f, 0, 1);
+                    Draw2DText(MouseOnMatrixX + .5f, MouseOnMatrixY - Height * lines - .4f, -4.5f, Width + .2f, Height * lines + .4f, Textures["DescBG"]);
                     //Gl.glColor3f(player.Inventory.Items[Y * player.Inventory.Width + X].NameR, player.Inventory.Items[Y * player.Inventory.Width + X].NameG, player.Inventory.Items[Y * player.Inventory.Width + X].NameB);
-                    DrawString(MouseOnMatrixX+.6f,
-                        MouseOnMatrixY  - .3f,
+                    DrawString(MouseOnMatrixX + .6f,
+                        MouseOnMatrixY - .3f,
                         -5,
                         Glut.GLUT_BITMAP_HELVETICA_18,
                         player.Inventory.Items[Y * player.Inventory.Width + X].Name,
                         player.Inventory.Items[Y * player.Inventory.Width + X].NameR,
                         player.Inventory.Items[Y * player.Inventory.Width + X].NameG,
-                        player.Inventory.Items[Y * player.Inventory.Width + X].NameB,true
+                        player.Inventory.Items[Y * player.Inventory.Width + X].NameB, true
                         );
 
                     DrawString(MouseOnMatrixX + .6f,
-                        MouseOnMatrixY - .3f-Height,
+                        MouseOnMatrixY - .3f - Height,
                         -5,
                         Glut.GLUT_BITMAP_HELVETICA_12,
-                        player.Inventory.Items[Y * player.Inventory.Width + X].Desc+"\n\nQuantity:" + player.Inventory.Items[Y * player.Inventory.Width + X].Quantity.ToString(), .8f,.8f,.8f,
+                        player.Inventory.Items[Y * player.Inventory.Width + X].Desc + "\n\nQuantity:" + player.Inventory.Items[Y * player.Inventory.Width + X].Quantity.ToString(), .8f, .8f, .8f,
                         true
                         );
                 }
@@ -308,53 +313,55 @@ namespace DX
             QuestPosX = 11;
             QuestPosY = 1.5f;
             QuestSizeX = 4;
-            QuestSizeY =6.5f;
+            QuestSizeY = 6.5f;
 
 
             if (QuestMenu)
             {
-                float TextCursor=0;
+                float TextCursor = 0;
                 float Height;
                 Gl.glColor3f(.3f, .15f, 0);
-                Draw2DText(QuestPosX,QuestPosY,-3.5f,QuestSizeX,QuestSizeY,Textures["Menu"]);
+                Draw2DText(QuestPosX, QuestPosY, -3.5f, QuestSizeX, QuestSizeY, Textures["Menu"]);
                 Gl.glLoadIdentity();
-                DrawStringCent(QuestPosX, QuestPosX+ QuestSizeX, QuestPosY+ QuestSizeY- .75f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, "Quests", 1f, 1f, 1f, true);
-                foreach (Quest quest in player.Quests) {
-                    if (quest.State != 0&&quest.Finished==false)
+                DrawStringCent(QuestPosX, QuestPosX + QuestSizeX, QuestPosY + QuestSizeY - .75f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, "Quests", 1f, 1f, 1f, true);
+                foreach (Quest quest in player.Quests)
+                {
+                    if (quest.State != 0 && quest.Finished == false)
                     {
                         int lines = 1;
-                        if(quest.Desc[quest.State - 1]!=null)for (int i = 0; i < quest.Desc[quest.State - 1].Length; i++)
-                            if (quest.Desc[quest.State - 1][i] == '\n') lines++;
+                        if (quest.Desc[quest.State - 1] != null) for (int i = 0; i < quest.Desc[quest.State - 1].Length; i++)
+                                if (quest.Desc[quest.State - 1][i] == '\n') lines++;
                         Height = Glut.glutBitmapHeight(Glut.GLUT_BITMAP_HELVETICA_18) * ScaleH;
-                        DrawStringCent(11, 15, 7.57f-TextCursor, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, quest.Name, 1f, 1f, .5f, true);
+                        DrawStringCent(11, 15, 7.57f - TextCursor, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, quest.Name, 1f, 1f, .5f, true);
                         TextCursor += Height;
-                        Height=lines*Glut.glutBitmapHeight(Glut.GLUT_BITMAP_HELVETICA_12) * ScaleH;
-                        DrawStringCent(11, 15, 7.57f-TextCursor, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, quest.Desc[quest.State - 1], 1f, 1f, .5f, true);
-                        TextCursor += Height+Glut.glutBitmapHeight(Glut.GLUT_BITMAP_HELVETICA_18) * ScaleH;
+                        Height = lines * Glut.glutBitmapHeight(Glut.GLUT_BITMAP_HELVETICA_12) * ScaleH;
+                        DrawStringCent(11, 15, 7.57f - TextCursor, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, quest.Desc[quest.State - 1], 1f, 1f, .5f, true);
+                        TextCursor += Height + Glut.glutBitmapHeight(Glut.GLUT_BITMAP_HELVETICA_18) * ScaleH;
 
                     }
                 }
             }
 
-            if (player.DialogMenu) {
+            if (player.DialogMenu)
+            {
                 if (!player.LastNPC.Trade)
                 {
                     Gl.glColor3f(.3f, .15f, 0);
                     Draw2DText(5.5f, .5f, -3.5f, 5, 2.5f, Textures["Menu"]);
-                    DrawString(5.75f, 2.65f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, player.LastNPC.Name+":\n"+player.LastNPC.DialogMenuText, 1f, 1f, 1f, true);
+                    DrawString(5.75f, 2.65f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, player.LastNPC.Name + ":\n" + player.LastNPC.DialogMenuText, 1f, 1f, 1f, true);
                     Gl.glLoadIdentity();
                 }
                 else
                 {
                     Gl.glColor3f(.3f, .15f, 0);
                     Draw2DText(5.5f, .5f, -3.5f, 5, 4.5f, Textures["Menu"]);
-                    for (int i = 0; i < player.LastNPC.Goods.Length;i++)
+                    for (int i = 0; i < player.LastNPC.Goods.Length; i++)
                     {
                         Gl.glColor3f(1, 1, 1);
-                        Draw2DText(5.75f+(i%6)*3f/4f,
-                            4f - (i/6)*3f/4f,
+                        Draw2DText(5.75f + (i % 6) * 3f / 4f,
+                            4f - (i / 6) * 3f / 4f,
                             -3.5f,
-                            3f/4f,3f/4f,Textures["ItemBG"]);
+                            3f / 4f, 3f / 4f, Textures["ItemBG"]);
                         Draw2DText(5.75f + (i % 6) * 3f / 4f,
                             4f - (i / 6) * 3f / 4f,
                             -3.5f,
@@ -363,20 +370,23 @@ namespace DX
                             4f - (i / 6) * 3f / 4f,
                             -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, player.LastNPC.Prices[i].ToString(), 1, 1f, .0f, true);
                     }
-                    DrawString(5.75f,.75f,-3.51f,Glut.GLUT_BITMAP_HELVETICA_12,"2.Exit",1,1,1,true);
+                    DrawString(5.75f, .75f, -3.51f, Glut.GLUT_BITMAP_HELVETICA_12, "2.Exit", 1, 1, 1, true);
                 }
             }
 
             //Уведомления изменения квестов
-            foreach (Quest quest in player.Quests) {
+            foreach (Quest quest in player.Quests)
+            {
                 if (quest.PopUp)
                 {
-                    if (InvMenu) {
+                    if (InvMenu)
+                    {
 
                         DrawString(6, 8, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, quest.Name, 1f, 1f, .3f, true);
                         DrawString(6, 7.5f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, quest.Desc[quest.State - 1], 1f, 1f, .3f, true);
                     }
-                    else { 
+                    else
+                    {
                         DrawString(1, 8, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, quest.Name, 1f, 1f, .3f, true);
                         DrawString(1, 7.5f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, quest.Desc[quest.State - 1], 1f, 1f, .3f, true);
                     }
@@ -387,18 +397,18 @@ namespace DX
 
             // Отрисовка курсора и хп бара
 
-            Gl.glColor4f(1, 1, 1,1);
-            Draw2DText(MouseOnMatrixX, MouseOnMatrixY - .5f, -4, .5f, .5f,Textures["Cursor"]);
+            Gl.glColor4f(1, 1, 1, 1);
+            Draw2DText(MouseOnMatrixX, MouseOnMatrixY - .5f, -4, .5f, .5f, Textures["Cursor"]);
             Gl.glColor3f(0, 0, 0);
             Draw2DText(1, 1, -4, 4, .3f, Textures["HPBAR"]);
             Gl.glColor3f(1f, 0, 0);
-            Draw2DText(1, 1, -4, 4*((float)player.Hp / (float)player.MaxHp) > 0 ? 4 * ((float)player.Hp / (float)player.MaxHp):0, .3f , Textures["HPBAR"]);
+            Draw2DText(1, 1, -4, 4 * ((float)player.Hp / (float)player.MaxHp) > 0 ? 4 * ((float)player.Hp / (float)player.MaxHp) : 0, .3f, Textures["HPBAR"]);
 
 
 
             //OtherShieeeet
 
-            DrawString(.3f,.3f,-4,Glut.GLUT_BITMAP_HELVETICA_10,player.X.ToString()+";"+player.Y.ToString(),1,1,1,true);
+            DrawString(.3f, .3f, -4, Glut.GLUT_BITMAP_HELVETICA_10, player.X.ToString() + ";" + player.Y.ToString(), 1, 1, 1, true);
 
 
             Gl.glFlush();
@@ -412,7 +422,8 @@ namespace DX
             Gl.glClear(Gl.GL_COLOR_BUFFER_BIT | Gl.GL_DEPTH_BUFFER_BIT);
 
             Gl.glClearColor(255, 255, 255, 1);
-            if (LoginScreen) {
+            if (LoginScreen)
+            {
                 Gl.glLoadIdentity();
                 CamX += .01f;
                 CamY += .01f;
@@ -461,7 +472,7 @@ namespace DX
                 MousePosOnAnt(out MouseX, out MouseY, out MouseOnMatrixX, out MouseOnMatrixY);
                 Gl.glColor4f(1, 1, 1, 1);
                 Draw2DText(MouseOnMatrixX, MouseOnMatrixY - .5f, -4, .5f, .5f, Textures["Cursor"]);
-                DrawStringCent(0,ScrW,3,-4,Glut.GLUT_BITMAP_HELVETICA_18,LoginScreenErr,1,0,0,true);
+                DrawStringCent(0, ScrW, 3, -4, Glut.GLUT_BITMAP_HELVETICA_18, LoginScreenErr, 1, 0, 0, true);
 
                 Gl.glFlush();
                 AnT.Invalidate();
@@ -483,12 +494,12 @@ namespace DX
                 EnemyList[5]= new Ghost(79, 68, RNG);
                 EnemyList[6]= new Ghost(81, 69, RNG);*/
 
-                DropList = new List<Item>();
+                //DropList = new List<Item>();
 
                 //Инициализация NPC
 
                 StreamReader SR = new StreamReader(File.OpenRead("NPCDialogs"));
-                
+
                 NPCList = new List<NPC>();
 
                 NPCDelegates _NPCDelegates = new NPCDelegates();
@@ -496,7 +507,7 @@ namespace DX
                 string Name;
                 List<string> dialogs = ReadDialog(out Name, SR);
 
-                NPCList.Add(new DX.NPC(76, 63,Name, new string[] { "IdleD" }, new NPCClickFuncDel(NPCDelegates.AndreClickFunc), new NPCCalcAnimDel(NPCDelegates.AndreCalcAnim), new NPCExMarkDel(NPCDelegates.AndreExMark),dialogs));
+                NPCList.Add(new DX.NPC(76, 63, Name, new string[] { "IdleD" }, new NPCClickFuncDel(NPCDelegates.AndreClickFunc), new NPCCalcAnimDel(NPCDelegates.AndreCalcAnim), new NPCExMarkDel(NPCDelegates.AndreExMark), dialogs));
 
                 object[,] Goodies = new object[,] { { new Potion(PotionType.Health, 1),25 }, { new Potion(PotionType.Energy, 1), 50 }, { new Potion(PotionType.Energy, 1), 50 }
                 , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 }
@@ -504,7 +515,7 @@ namespace DX
                 , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 }
                 , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } };
                 dialogs = ReadDialog(out Name, SR);
-                NPCList.Add(new DX.NPC(78,60,Name, new string[] { "IdleL" },new NPCClickFuncDel(NPCDelegates.VendorClickFunc),new NPCCalcAnimDel(NPCDelegates.VendorCalcAnim),new NPCExMarkDel(NPCDelegates.VendorExMark),dialogs,Goodies));
+                NPCList.Add(new DX.NPC(78, 60, Name, new string[] { "IdleL" }, new NPCClickFuncDel(NPCDelegates.VendorClickFunc), new NPCCalcAnimDel(NPCDelegates.VendorCalcAnim), new NPCExMarkDel(NPCDelegates.VendorExMark), dialogs, Goodies));
 
                 Item.Drop = DropList;
 
@@ -521,10 +532,12 @@ namespace DX
                 InterpolationTimer.Start();
 
 
-                Reader=new Task(() => {
-                    while (true) {
+                Reader = new Task(() => {
+                    while (true)
+                    {
                         Thread.Sleep(100);
-                        if (this.IsDisposed) {
+                        if (this.IsDisposed)
+                        {
                             Process.GetCurrentProcess().Kill();
                             return;
                         }
@@ -544,30 +557,10 @@ namespace DX
             player.CheckDeath();
             player.CalcAnim();
             player.CalcRotation(MouseX, MouseY, AnT.Width / 2, AnT.Height / 2);
-
-            byte Direction=0;
-
-            if (player.LEFT) Direction = 3;
-            if (player.RIGHT) Direction = 1;
-            if (player.DOWN) Direction = 4;
-            if (player.UP) Direction = 2;
             
-            if (!player.LEFT && !player.RIGHT && !player.UP && !player.DOWN)
-            {
-                if(pingcounter<5) connect.SendXYD(player.X, player.Y, player.Rotation, Direction);
-                if (pingcounter >= 200)
-                {
-                    pingcounter = 0;
-                    connect.SendXYD(player.X, player.Y, player.Rotation, Direction);
-                }
-                pingcounter++;
-            }
-            else
-            {
-                pingcounter = 0;
-                connect.SendXYD(player.X, player.Y, player.Rotation, Direction);
-            }
-            for(int i=0;i<EnemyList.Length;i++)
+
+            connect.SendXYD(player.X, player.Y, player.Rotation, player.Direction);
+            for (int i = 0; i < EnemyList.Length; i++)
             {
                 if (EnemyList[i] == null) continue;
 
@@ -622,14 +615,14 @@ namespace DX
 
                     byte[] inbuffer = BitConverter.GetBytes(clr);
 
-                    byte wat=inbuffer[0];
+                    byte wat = inbuffer[0];
                     inbuffer[0] = inbuffer[2];
                     inbuffer[2] = wat;
 
                     int outbuffer = BitConverter.ToInt32(inbuffer, 0);
-                    
+
                     var clrout = Color.FromArgb(outbuffer);
-                    
+
                     bmp.SetPixel(i, j, clrout);
                 }
             }
@@ -639,7 +632,7 @@ namespace DX
                 ImageLockMode.ReadOnly,
                 PixelFormat.Format32bppArgb);
 
-            
+
 
             Gl.glTexImage2D(Gl.GL_TEXTURE_2D, 0, (int)Gl.GL_RGBA,
                 bmp.Width, bmp.Height, 0, Gl.GL_RGBA,
@@ -655,6 +648,8 @@ namespace DX
         {
             connect = new NetGame(4446, ref PlayersList, ref EnemyList, ref DropList); //Server ip, log port, game port, my port
             RNG = new Random(Environment.TickCount);
+
+            //Wgl.wglUseFontBitmapsA(hDC, 32, 224, base);
 
             ScrW = 16;
             ScrH = 9;
@@ -707,8 +702,10 @@ namespace DX
 
             col_map = new byte[ObjMapReader.X, ObjMapReader.Y];
 
-            for (int i = 0; i < ObjMapReader.X; i++) {
-                for (int j = 0; j < ObjMapReader.Y; j++) {
+            for (int i = 0; i < ObjMapReader.X; i++)
+            {
+                for (int j = 0; j < ObjMapReader.Y; j++)
+                {
                     if (map[i, j] == 3 || map[i, j] == 4 || map[i, j] == 5) col_map[i, j] = 1; else col_map[i, j] = 0;
                 }
             }
@@ -825,7 +822,8 @@ namespace DX
                 bool A = IsKeyDown(Keys.A);
                 bool S = IsKeyDown(Keys.S);
                 bool D = IsKeyDown(Keys.D);
-                player.MovedByControl(W, A, S, D, col_map);
+                player.CalcDir(W, A, S, D);
+                player.CalcSpriteDir(W, A, S, D);
             }
         }
 
@@ -833,7 +831,7 @@ namespace DX
 
         private void AnT_MouseClick(object sender, MouseEventArgs e)
         {
-            if (!LoginScreen&&player!=null)
+            if (!LoginScreen && player != null)
             {
                 if (e.Button == MouseButtons.Left)
                 {
@@ -856,14 +854,14 @@ namespace DX
                             return;
                         }
                     }
-                    if (player.DialogMenu&&player.LastNPC.Trade)
+                    if (player.DialogMenu && player.LastNPC.Trade)
                     {
-                        int X = ((MouseOnMatrixX - 5.75f) * 4f / 3f)>=0? (int)((MouseOnMatrixX - 5.75f) * 4f / 3f):-1;
-                        int Y = ((4f + 3f / 4f - MouseOnMatrixY) * 4f / 3f) >= 0? (int)((4f + 3f / 4f - MouseOnMatrixY) * 4f / 3f) :-1 ;
+                        int X = ((MouseOnMatrixX - 5.75f) * 4f / 3f) >= 0 ? (int)((MouseOnMatrixX - 5.75f) * 4f / 3f) : -1;
+                        int Y = ((4f + 3f / 4f - MouseOnMatrixY) * 4f / 3f) >= 0 ? (int)((4f + 3f / 4f - MouseOnMatrixY) * 4f / 3f) : -1;
 
-                        if (X >= 0 && X < 6 && Y >= 0 && Y < player.LastNPC.Goods.Length/6+1)
+                        if (X >= 0 && X < 6 && Y >= 0 && Y < player.LastNPC.Goods.Length / 6 + 1)
                         {
-                            if (player.LastNPC.Goods!=null&&player.LastNPC.Goods[X+Y*6] != null)
+                            if (player.LastNPC.Goods != null && player.LastNPC.Goods[X + Y * 6] != null)
                                 player.LastNPC.Sell(player, X + Y * 6);
                             return;
                         }
@@ -885,7 +883,7 @@ namespace DX
             }
         }
 
-        private void AnT_KeyUp(object sender, KeyEventArgs e)
+        private async void AnT_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Escape)
             {
@@ -893,12 +891,15 @@ namespace DX
                 this.FormBorderStyle = FormBorderStyle.Sizable;
                 this.WindowState = FormWindowState.Normal;
             }
-            if (e.KeyCode == Keys.F12) {
-                if (fullscreen) {
+            if (e.KeyCode == Keys.F12)
+            {
+                if (fullscreen)
+                {
                     fullscreen = false;
                     this.FormBorderStyle = FormBorderStyle.Sizable;
                     this.WindowState = FormWindowState.Normal;
-                } else
+                }
+                else
                 {
                     fullscreen = true;
                     this.FormBorderStyle = FormBorderStyle.None;
@@ -909,12 +910,22 @@ namespace DX
             {
                 if (e.KeyCode == Keys.E)
                 {
-                    Item Nearest = GetNearestItem();
-                    if (Nearest != null)
+                    Item pickup = GetNearestItem();
+                    if (pickup != null)
                     {
-                        Item pickup = (Item)Nearest.Clone();
-                        DropList.Remove(Nearest);
-                        player.Inventory.Add(pickup);
+                        //Item pickup = (Item)Nearest.Clone();
+
+                        Console.WriteLine("Try to Takin:: Id:" + pickup.Id + " Ex:" + pickup.Id_exemplar);
+                        if (await connect.Take_Drop(pickup.Id, pickup.Id_exemplar))
+                        {
+                            DropList.Remove(pickup);
+                            player.Inventory.Add(pickup);
+                        }
+                        else
+                        {
+                            DropList.Remove(pickup);
+                            Console.WriteLine("Can't take it");
+                        }
                     }
                 }
                 if (InvMenu)
@@ -940,15 +951,19 @@ namespace DX
                     }
                 }
                 if (e.KeyCode == Keys.J) QuestMenu = !QuestMenu;
-                if (e.KeyCode == Keys.I) {
+                if (e.KeyCode == Keys.I)
+                {
                     //Console.Write("Инвентарь открылся ууууух!");
-                    InvMenu = !InvMenu; }
+                    InvMenu = !InvMenu;
+                }
                 if (e.KeyCode == Keys.Escape) { InvMenu = false; QuestMenu = false; }
             }
         }
 
-        void MousePosOnAnt(out int X,out int Y, out float MouseOnMatrixX, out float MouseOnMatrixY) {
-            if (fullscreen) {
+        void MousePosOnAnt(out int X, out int Y, out float MouseOnMatrixX, out float MouseOnMatrixY)
+        {
+            if (fullscreen)
+            {
                 X = Form1.MousePosition.X - this.Location.X;
                 Y = AnT.Height - (Form1.MousePosition.Y - this.Location.Y);
                 MouseOnMatrixX = (float)X / (float)AnT.Width * (float)ScrW;
@@ -963,9 +978,10 @@ namespace DX
             }
         }
 
-        void MousePosOnMap() {
+        void MousePosOnMap()
+        {
             MousePosOnAnt(out MouseX, out MouseY, out MouseOnMatrixX, out MouseOnMatrixY);
-            MouseOnMapX = player.X + MouseOnMatrixX - ScrW/2;
+            MouseOnMapX = player.X + MouseOnMatrixX - ScrW / 2;
             MouseOnMapY = player.Y + MouseOnMatrixY - ScrH / 2;
         }
 
@@ -984,10 +1000,10 @@ namespace DX
         void Draw2DText(float X, float Y, float Z, float XW, float YW)
         {
             Gl.glBegin(Gl.GL_QUADS);
-            Gl.glTexCoord2f(0, 1); Gl.glVertex3f(X, Y,Z);
-            Gl.glTexCoord2f(0, 0); Gl.glVertex3f(X, Y + YW,Z);
-            Gl.glTexCoord2f(1, 0); Gl.glVertex3f(X + XW, Y + YW,Z);
-            Gl.glTexCoord2f(1, 1); Gl.glVertex3f(X + XW, Y,Z);
+            Gl.glTexCoord2f(0, 1); Gl.glVertex3f(X, Y, Z);
+            Gl.glTexCoord2f(0, 0); Gl.glVertex3f(X, Y + YW, Z);
+            Gl.glTexCoord2f(1, 0); Gl.glVertex3f(X + XW, Y + YW, Z);
+            Gl.glTexCoord2f(1, 1); Gl.glVertex3f(X + XW, Y, Z);
             Gl.glEnd();
         }
 
@@ -995,10 +1011,10 @@ namespace DX
         {
             Gl.glBindTexture(Gl.GL_TEXTURE_2D, Text);
             Gl.glBegin(Gl.GL_QUADS);
-            Gl.glTexCoord3f(0, 1,Z); Gl.glVertex3f(X - XW / 2, Y - YW / 2,Z);
-            Gl.glTexCoord3f(0, 0,Z); Gl.glVertex3f(X - XW / 2, Y + YW / 2,Z);
-            Gl.glTexCoord3f(1, 0,Z); Gl.glVertex3f(X + XW / 2, Y + YW / 2,Z);
-            Gl.glTexCoord3f(1, 1,Z); Gl.glVertex3f(X + XW / 2, Y - YW / 2,Z);
+            Gl.glTexCoord3f(0, 1, Z); Gl.glVertex3f(X - XW / 2, Y - YW / 2, Z);
+            Gl.glTexCoord3f(0, 0, Z); Gl.glVertex3f(X - XW / 2, Y + YW / 2, Z);
+            Gl.glTexCoord3f(1, 0, Z); Gl.glVertex3f(X + XW / 2, Y + YW / 2, Z);
+            Gl.glTexCoord3f(1, 1, Z); Gl.glVertex3f(X + XW / 2, Y - YW / 2, Z);
             Gl.glEnd();
         }
 
@@ -1012,12 +1028,14 @@ namespace DX
             Gl.glEnd();
         }
 
-        void DrawString(float X, float Y, float Z, IntPtr font, string text, float R, float G, float B, bool shadow) {
+        void DrawString(float X, float Y, float Z, IntPtr font, string text, float R, float G, float B, bool shadow)
+        {
             Gl.glDisable(Gl.GL_TEXTURE_2D);
-            
-            if (shadow) {
+
+            if (shadow)
+            {
                 Gl.glColor3f(0, 0, 0);
-                Gl.glRasterPos3f(X+.02f, Y+.02f, Z);
+                Gl.glRasterPos3f(X + .02f, Y + .02f, Z);
                 Glut.glutBitmapString(font, text);
             }
             Gl.glColor3f(R, G, B);
@@ -1026,9 +1044,9 @@ namespace DX
             Gl.glEnable(Gl.GL_TEXTURE_2D);
         }
 
-        void DrawStringCent(float X1,float X2, float Y, float Z, IntPtr font, string text, float R, float G, float B, bool shadow)
+        void DrawStringCent(float X1, float X2, float Y, float Z, IntPtr font, string text, float R, float G, float B, bool shadow)
         {
-            float X=X1+(X2-X1-Glut.glutBitmapLength(font,text)*ScrW/AnT.Width)/2;
+            float X = X1 + (X2 - X1 - Glut.glutBitmapLength(font, text) * ScrW / AnT.Width) / 2;
             Gl.glDisable(Gl.GL_TEXTURE_2D);
             if (shadow)
             {
@@ -1059,19 +1077,23 @@ namespace DX
         }
 
 
-        float OnScreenYtoZ(float Y) {
-            return -.15f-ScrH/6 + (Y - player.Y + ScrH / 2)/6;
+        float OnScreenYtoZ(float Y)
+        {
+            return -.15f - ScrH / 6 + (Y - player.Y + ScrH / 2) / 6;
         }
 
 
-        Enemy[] GetNearbyEnemies(float playerX, float playerY, Enemy[] Enemies) {
+        Enemy[] GetNearbyEnemies(float playerX, float playerY, Enemy[] Enemies)
+        {
             Enemy[] output = new Enemy[Enemies.Length];
-            int index=0;
+            int index = 0;
 
-            for (int i=0;i<Enemies.Length;i++) {
+            for (int i = 0; i < Enemies.Length; i++)
+            {
                 if (Enemies[i] == null) continue;
-                if (Math.Sqrt((playerX - Enemies[i].X) * (playerX - Enemies[i].X) + (playerY - Enemies[i].Y) * (playerY - Enemies[i].Y)) < 11f) {
-                    output[index]=Enemies[i];
+                if (Math.Sqrt((playerX - Enemies[i].X) * (playerX - Enemies[i].X) + (playerY - Enemies[i].Y) * (playerY - Enemies[i].Y)) < 11f)
+                {
+                    output[index] = Enemies[i];
                     index++;
                 }
             }
@@ -1080,7 +1102,7 @@ namespace DX
             return output;
         }
 
-        List<Item> GetNearbyItems(float playerX, float playerY,  List<Item> Items)
+        List<Item> GetNearbyItems(float playerX, float playerY, List<Item> Items)
         {
             List<Item> output = new List<Item>();
             foreach (Item enemy in Items)
@@ -1095,62 +1117,62 @@ namespace DX
 
         private void button1_Click(object sender, EventArgs e)
         {
-                if (textBox1.Text == "Offline")
-                {
-                    textBox1.Enabled = false;
-                    textBox2.Enabled = false;
-                    button1.Enabled = false;
-                    textBox1.Visible = false;
-                    textBox2.Visible = false;
-                    button1.Visible = false;
-                    LoginScreen = false;
-                }
+            if (textBox1.Text == "Offline")
+            {
+                textBox1.Enabled = false;
+                textBox2.Enabled = false;
+                button1.Enabled = false;
+                textBox1.Visible = false;
+                textBox2.Visible = false;
+                button1.Visible = false;
+                LoginScreen = false;
+            }
 
-                IPAddress useless;
-                string ip;
-                string char_name;
-                if (textBox1.Text != "") char_name = textBox1.Text;
-                else
-                {
-                    LoginScreenErr = "Empty Name"; return;
-                }
+            IPAddress useless;
+            string ip;
+            string char_name;
+            if (textBox1.Text != "") char_name = textBox1.Text;
+            else
+            {
+                LoginScreenErr = "Empty Name"; return;
+            }
 
-                if (textBox2.Text != "") ip = textBox2.Text;
-                else
-                {
-                    LoginScreenErr = "Empty IP"; return;
-                }
+            if (textBox2.Text != "") ip = textBox2.Text;
+            else
+            {
+                LoginScreenErr = "Empty IP"; return;
+            }
 
-                if (!IPAddress.TryParse(ip, out useless))
-                {
-                    LoginScreenErr = "Wrong IP Format"; return;
-                };
+            if (!IPAddress.TryParse(ip, out useless))
+            {
+                LoginScreenErr = "Wrong IP Format"; return;
+            };
 
-                connect.Set_Addr(ip, 5001, 5000);
-                if (!connect.IsConnectable())
-                {
-                    LoginScreenErr = "Server unreachable";
-                    return;
-                }
+            connect.Set_Addr(ip, 5001, 5000);
+            if (!connect.IsConnectable())
+            {
+                LoginScreenErr = "Server unreachable";
+                return;
+            }
 
-                if (connect.LogAndGame(char_name, 50, 30))
-                {
-                    textBox1.Enabled = false;
-                    textBox2.Enabled = false;
-                    button1.Enabled = false;
-                    textBox1.Visible = false;
-                    textBox2.Visible = false;
-                    button1.Visible = false;
-                    LoginScreen = false;
-                }
-                else 
-                {
-                    LoginScreenErr = connect.denied_info;
-                    return;
-                }
-                
+            if (connect.LogAndGame(char_name, 50, 30))
+            {
+                textBox1.Enabled = false;
+                textBox2.Enabled = false;
+                button1.Enabled = false;
+                textBox1.Visible = false;
+                textBox2.Visible = false;
+                button1.Visible = false;
+                LoginScreen = false;
+            }
+            else
+            {
+                LoginScreenErr = connect.denied_info;
+                return;
+            }
 
-               
+
+
         }
 
         List<NPC> GetNearbyNPCs(float playerX, float playerY, List<NPC> NPCs)
@@ -1169,23 +1191,26 @@ namespace DX
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            connect.End_Session();
+            if (connect.session_ON) connect.End_Session();
         }
 
         private void InterpolationTimer_Tick(object sender, EventArgs e)
         {
-            for (int i = 1; i < PlayersList.Length; i++) {
+            for (int i = 0; i < PlayersList.Length; i++)
+            {
                 if (PlayersList[i] == null) continue;
                 PlayersList[i].Interpolation();
             }
-            for (int i = 0; i < EnemyList.Length; i++) {
+            for (int i = 0; i < EnemyList.Length; i++)
+            {
                 if (EnemyList[i] == null) continue;
                 EnemyList[i].Interpolation();
             }
         }
-        
 
-        Item GetNearestItem() {
+
+        Item GetNearestItem()
+        {
             if (DropList.Count == 0) return null;
             Item Nearest = DropList.First();
             double ThisDist;
@@ -1201,7 +1226,7 @@ namespace DX
             }
             if (NearestDist < 1.5f) return Nearest;
             else return null;
-            
+
         }
 
         private void Form1_Resize_1(object sender, EventArgs e)
@@ -1213,7 +1238,8 @@ namespace DX
                 ResizeGlScene();
                 RenderTimer.Start();
             }
-            else {
+            else
+            {
                 LoginScreenRenderTimer.Stop();
                 Thread.Sleep(20);
                 ResizeGlScene();
@@ -1237,7 +1263,8 @@ namespace DX
         }
 
 
-        List<string> ReadDialog(out string Name,StreamReader SR) {
+        List<string> ReadDialog(out string Name, StreamReader SR)
+        {
             Name = SR.ReadLine();
             List<string> dialogs = new List<string>();
             string sum = "";
@@ -1291,5 +1318,5 @@ namespace DX
         [DllImport("user32.dll")]
         public extern static Int16 GetKeyState(Int16 nVirtKey);
     }
-    
+
 }

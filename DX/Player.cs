@@ -280,6 +280,102 @@ namespace DX
         }
 
 
+        public void CalcSpriteDir(bool W, bool A, bool S, bool D)
+        {
+            if (alive)
+            {
+                if (W && !A && !D && !S) 
+                        UP = true;
+                    
+                else UP = false;
+
+                if (A && !W && !S && !D)
+                        LEFT = true;
+                else LEFT = false;
+
+                if (S && !A && !D && !W) 
+                        DOWN = true;
+                else DOWN = false;
+
+                if (D && !W && !S && !A) 
+                        RIGHT = true;
+                else RIGHT = false;
+
+
+                bool diagonal = false;
+
+                if (!LEFT && !RIGHT && !UP && !DOWN) diagonal = true;
+
+                if (W && D && !A && !S)
+                {
+                        if (diagonal) RIGHT = true;
+                    
+                }
+                if (W && A && !D && !S)
+                {
+                        if (diagonal) LEFT = true;
+                    
+                }
+                if (S && D && !A && !W)
+                {
+                        if (diagonal) RIGHT = true;
+                        
+                }
+                if (S && A && !D && !W)
+                {
+                        if (diagonal) LEFT = true;
+                    
+                }
+            }
+        }
+
+
+        public void CalcDir(bool W, bool A, bool S, bool D)
+        {
+            if (alive)
+            {
+                if (W && !A && !D && !S)
+                    direction = 3;
+                else UP = false;
+
+                if (A && !W && !S && !D)
+                    direction = 5;
+                else LEFT = false;
+
+                if (S && !A && !D && !W)
+                    direction = 7;
+                else DOWN = false;
+
+                if (D && !W && !S && !A)
+                    direction = 1;
+                else RIGHT = false;
+
+
+                bool diagonal = false;
+
+                if (!LEFT && !RIGHT && !UP && !DOWN) diagonal = true;
+
+                if (W && D && !A && !S)
+                {
+                    if (diagonal) direction = 2;
+                }
+                if (W && A && !D && !S)
+                {
+                    if (diagonal) direction = 4;
+                }
+                if (S && D && !A && !W)
+                {
+                    if (diagonal) direction = 8;
+                }
+                if (S && A && !D && !W)
+                {
+                    if (diagonal) direction = 6;
+                    
+                }
+            }
+            if (!W && !A && !S && !D) direction = 0;
+        }
+
 
         public void ResetAnim() {
             RunAnState = 0;
