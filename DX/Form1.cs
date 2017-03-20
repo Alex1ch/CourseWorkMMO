@@ -565,7 +565,14 @@ namespace DX
                 if (EnemyList[i] == null) continue;
 
                 EnemyList[i].CalcAnim();
-                EnemyList[i].DeathCheck();
+                if (EnemyList[i].Active == false && !EnemyList[i].DeathCheck())
+                {
+                    EnemyList[i].X = EnemyList[i].SX;
+                    EnemyList[i].Y = EnemyList[i].SY;
+                }
+                else {
+                    EnemyList[i].DeathCheck();
+                }
                 //EnemyList[i].WorkFunc(AllPlayers,DropList,RNG);
             }
             //textBox3.Text = "";
@@ -920,10 +927,12 @@ namespace DX
                         {
                             DropList.Remove(pickup);
                             player.Inventory.Add(pickup);
+                            pickup.Dropped = false;
                         }
                         else
                         {
                             DropList.Remove(pickup);
+                            pickup = null;
                             Console.WriteLine("Can't take it");
                         }
                     }

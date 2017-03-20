@@ -156,7 +156,7 @@ namespace DX
                     player.RIGHT = false;
                     player.DOWN = false;
                 }
-                if (d == 1||d==2||d==8)
+                if (d == 1 || d == 2 || d == 8)
                 {
                     player.LEFT = false;
                     player.UP = false;
@@ -170,7 +170,7 @@ namespace DX
                     player.DOWN = false;
                     player.UP = true;
                 }
-                if (d == 5||d==6||d==4)
+                if (d == 5 || d == 6 || d == 4)
                 {
                     player.UP = false;
                     player.RIGHT = false;
@@ -351,7 +351,7 @@ namespace DX
         static IPEndPoint login_addr;
         static IPEndPoint game_addr;
         static IPEndPoint my_addr;
-        static IPEndPoint ipendpoint;
+        static IPEndPoint ipendpoint = null;
         static int log_port;
         static int game_port;
         static int my_port;
@@ -363,32 +363,8 @@ namespace DX
         static bool available_port = false;   //Для обозначения того, что нашелся ли свободный порт для клиента
         static bool IsExit = false; //Происходит отключение или нет
 
-        //Полученное от сервера сообщение
-        static private string rec_msg = "null";
-        public string Recv_Msg
-        {
-            get
-            {
-                string copy = rec_msg;
-                rec_msg = "null";
-                return copy;
-            }
-        }
-
         byte[] start_info = new byte[256];
         public string denied_info = "Error while logging";
-
-        //Cтатус выхода
-        static private string exit_status = "null";
-        public string Exit_Status
-        {
-            get
-            {
-                string exit_copy = exit_status;
-                exit_status = "null";
-                return exit_copy;
-            }
-        }
 
         //Имя персонажа данного клиента
         static private string char_name = "null";
@@ -482,7 +458,7 @@ namespace DX
                 Thread.Sleep(Sleep_Interval);
 
                 //Читаем полученное сообщение и освобождаем ресурсы
-                if (Recv_Msg == "ALIVE")
+                if (Permissions[255] == "ALIVE")
                 {
                     listen = false;
                     thrListen.Join(1);
@@ -544,7 +520,7 @@ namespace DX
                 Send(3, char_name, game_addr);//END
                 Thread.Sleep(Sleep_Interval);
 
-                if (Exit_Status == "SUCCESSFUL")
+                if (Permissions[252] == "SUCCESSFUL")
                 {
                     // Останавливаем цикл в дополнительном потоке
                     listen = false;
@@ -584,7 +560,7 @@ namespace DX
             {
                 while (listen)
                 {
-                    ipendpoint = null;
+                    //ipendpoint = null;
                     msg = client_udp.Receive(ref ipendpoint);
                     //Console.WriteLine("Received:  " + Cons.GetData(msg));
 
@@ -596,7 +572,8 @@ namespace DX
                         {
                             //Ответ сервера когда на IsConnectable
                             case 255:
-                                rec_msg = "ALIVE";
+                                Permissions[255] = "ALIVE";
+                                //rec_msg = "ALIVE";
                                 break;
 
                             //Сервер сообщает о старте Сессии   
@@ -619,18 +596,16 @@ namespace DX
                             //Уведомление сервером о том, что сессия успешно завершена 
                             case 252:
                                 Console.WriteLine("Exit message: " + Cons.GetData(msg));
-                                //Проверка, чтобы не завершить сессию по какой-либо ошибке
-                                if (IsExit) exit_status = "SUCCESSFUL";
+                                if (IsExit) Permissions[252] = "SUCCESSFUL";
                                 break;
 
                             //Сервер присылает координаты всех чаров и их имен
                             case 251://CH_XYD
                                 if (!session_ON) break;
-                                // вытаскиваю имя перса из пакета
                                 string name = Cons.GetName18b(msg);
+
                                 //Если в пакете есть имя перса клиента
-                                if (name != char_name)
-                                    Cons.Parse_CharsXYD(ref Players, msg);
+                                if (name != char_name) Cons.Parse_CharsXYD(ref Players, msg);
                                 break;
 
                             //PLAYER_INFO	| 1[lvl] 2-5[maxHP] 6-end[charname]	

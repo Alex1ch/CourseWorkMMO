@@ -42,11 +42,13 @@ namespace DX
         public virtual void WorkCycle(List<DX.Player> Player) { }
 
         public virtual void DropFunc(List<Item> DropList, Random RNG) { }
+        public virtual void DropFunc(List<Item> DropList, Random RNG,Player player) { }
 
         public virtual void CalcAnim() { }
 
         public bool DeathCheck() {
             if (hp > 0) {
+                active = true;
                 return false;
             }
             active = false;
