@@ -158,7 +158,7 @@ namespace DX
                 if (PlayersList[i] == null) continue;
                 if (Math.Sqrt((player.X - PlayersList[i].X) * (player.X - PlayersList[i].X) + (player.Y - PlayersList[i].Y) * (player.Y - PlayersList[i].Y)) > 11f) continue;
                 PlayersList[i].CalcAnim();
-                if (PlayersList[i].Alive)
+                if (PlayersList[i].Alive/*&&DateTime.Now.Ticks-player.LastPack<10000000000*/)
                 {
                     //Console.WriteLine(PlayersList[i].Name + " " + PlayersList[i].X + " " + PlayersList[i].Y);
                     DrawStringCent(PlayersList[i].X - 2, PlayersList[i].X + 2, PlayersList[i].Y + 1.3f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, PlayersList[i].Name, 1, 1, 1, true);
@@ -332,10 +332,10 @@ namespace DX
                         if (quest.Desc[quest.State - 1] != null) for (int i = 0; i < quest.Desc[quest.State - 1].Length; i++)
                                 if (quest.Desc[quest.State - 1][i] == '\n') lines++;
                         Height = Glut.glutBitmapHeight(Glut.GLUT_BITMAP_HELVETICA_18) * ScaleH;
-                        DrawStringCent(11, 15, 7.57f - TextCursor, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, quest.Name, 1f, 1f, .5f, true);
+                        DrawStringCent(QuestPosX, QuestPosX+QuestSizeX, QuestPosY+QuestSizeY-1.4f - TextCursor, -3.5f, Glut.GLUT_BITMAP_HELVETICA_18, quest.Name, 1f, 1f, .5f, true);
                         TextCursor += Height;
                         Height = lines * Glut.glutBitmapHeight(Glut.GLUT_BITMAP_HELVETICA_12) * ScaleH;
-                        DrawStringCent(11, 15, 7.57f - TextCursor, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, quest.Desc[quest.State - 1], 1f, 1f, .5f, true);
+                        DrawStringCent(QuestPosX, QuestPosX + QuestSizeX, QuestPosY + QuestSizeY - 1.4f - TextCursor, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, quest.Desc[quest.State - 1], 1f, 1f, .5f, true);
                         TextCursor += Height + Glut.glutBitmapHeight(Glut.GLUT_BITMAP_HELVETICA_18) * ScaleH;
 
                     }
@@ -509,22 +509,23 @@ namespace DX
 
                 NPCList.Add(new DX.NPC(76, 63, Name, new string[] { "IdleD" }, new NPCClickFuncDel(NPCDelegates.AndreClickFunc), new NPCCalcAnimDel(NPCDelegates.AndreCalcAnim), new NPCExMarkDel(NPCDelegates.AndreExMark), dialogs));
 
-                object[,] Goodies = new object[,] { { new Potion(PotionType.Health, 1),25 }, { new Potion(PotionType.Energy, 1), 50 }, { new Potion(PotionType.Energy, 1), 50 }
+                object[,] Goodies = new object[,] { };//
+                /*object[,] Goodies = new object[,] { { new Potion(PotionType.Health, 1),25 }, { new Potion(PotionType.Energy, 1), 50 }, { new Potion(PotionType.Energy, 1), 50 }
                 , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 }
                 , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 }
                 , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 }
-                , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } };
+                , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } };*/
                 dialogs = ReadDialog(out Name, SR);
                 NPCList.Add(new DX.NPC(78, 60, Name, new string[] { "IdleL" }, new NPCClickFuncDel(NPCDelegates.VendorClickFunc), new NPCCalcAnimDel(NPCDelegates.VendorCalcAnim), new NPCExMarkDel(NPCDelegates.VendorExMark), dialogs, Goodies));
 
                 Item.Drop = DropList;
 
+                /*player.Inventory.Add(new Potion(PotionType.Health, 20));
                 player.Inventory.Add(new Potion(PotionType.Health, 20));
                 player.Inventory.Add(new Potion(PotionType.Health, 20));
                 player.Inventory.Add(new Potion(PotionType.Health, 20));
                 player.Inventory.Add(new Potion(PotionType.Health, 20));
-                player.Inventory.Add(new Potion(PotionType.Health, 20));
-                player.Inventory.Add(new Gold(int.MaxValue));
+                player.Inventory.Add(new Gold(int.MaxValue));*/
 
                 RenderTimer.Start();
                 LogicTimer.Start();

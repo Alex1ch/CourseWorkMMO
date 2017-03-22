@@ -145,7 +145,7 @@ namespace DX
         int killlimit = 7;
 
         public DarkSignsQuest() {
-            base.Reward.Add(new Gold(100000));
+            //base.Reward.Add(new Gold(100000));
             base.FinishState = 4;
             base.Name = "Dark Signs";
             base.Desc = new string[base.FinishState];

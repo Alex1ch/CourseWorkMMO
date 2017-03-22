@@ -261,9 +261,10 @@ namespace DX
         }
 
 
-        public Gold(int quantity)
+        public Gold(int quantity, int EX)
         {
             base.Id = 69;
+            base.Id_exemplar = EX;
             base.MaxQuantity = int.MaxValue;
             base.Quantity = quantity;
             base.Name = "Gold";
@@ -321,12 +322,14 @@ namespace DX
         }
 
 
-        public Potion(PotionType _potionType, int quantity)
+        public Potion(PotionType _potionType, int quantity, int EX)
         {
             base.Dropped = false;
             potionType = _potionType;
             base.MaxQuantity = 20;
             base.Quantity = quantity;
+            base.Id_exemplar = EX;
+
             if (potionType == PotionType.Health)
             {
                 base.Name = "Health Potion";

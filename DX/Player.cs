@@ -11,6 +11,9 @@ namespace DX
     {
         public NPC LastNPC;
 
+        bool Visible = false;
+        long lastPack;
+
         byte level;
         long exp;
 
@@ -64,6 +67,7 @@ namespace DX
 
         public Player(float pX, float pY, Inventory _inventory, string _name)
         {
+            lastPack = DateTime.Now.Ticks;
             name = _name;
             quests.Add(new DarkSignsQuest());
             x = pX; y = pY;
@@ -285,20 +289,19 @@ namespace DX
             if (alive)
             {
                 if (W && !A && !D && !S) 
-                        UP = true;
-                    
+                    UP = true;
                 else UP = false;
 
                 if (A && !W && !S && !D)
-                        LEFT = true;
+                    LEFT = true;
                 else LEFT = false;
 
                 if (S && !A && !D && !W) 
-                        DOWN = true;
+                    DOWN = true;
                 else DOWN = false;
 
                 if (D && !W && !S && !A) 
-                        RIGHT = true;
+                    RIGHT = true;
                 else RIGHT = false;
 
 
@@ -862,6 +865,32 @@ namespace DX
             get
             {
                 return basespeed+speedbuff;
+            }
+        }
+
+        public bool Visible1
+        {
+            get
+            {
+                return Visible;
+            }
+
+            set
+            {
+                Visible = value;
+            }
+        }
+
+        public long LastPack
+        {
+            get
+            {
+                return lastPack;
+            }
+
+            set
+            {
+                lastPack = value;
             }
         }
     }

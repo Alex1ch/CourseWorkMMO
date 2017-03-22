@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net.NetworkInformation;
 
 namespace DX
 {
@@ -148,7 +149,7 @@ namespace DX
                 Player player = new Player(BitConverter.ToSingle(x, 0), BitConverter.ToSingle(y, 0), name);
                 players[GetNull(players)] = player;
                 player.Rotation = BitConverter.ToSingle(r, 0);
-
+                
                 if (d == 0)
                 {
                     player.LEFT = false;
@@ -193,6 +194,8 @@ namespace DX
                 player.SX = BitConverter.ToSingle(x, 0);
                 player.SY = BitConverter.ToSingle(y, 0);
                 player.Rotation = BitConverter.ToSingle(r, 0);
+
+                player.LastPack = DateTime.Now.Ticks;
 
                 if (d == 0)
                 {
@@ -339,6 +342,43 @@ namespace DX
                     return false;
             }
         }
+
+        //242     INV_UPDATE  | 1-4[q_all] 5-8[id] 9-12[ex] 13-16[q]...
+        public static bool UpdateInventory(Player player, byte[] msg)
+        {
+            byte[] data = new byte[msg.Length - 1];
+            Array.Copy(msg, 1, data, 0, msg.Length - 1);
+
+            byte[] totalb = new byte[4];
+            Array.Copy(data, 0, totalb, 0, 4);
+            int total = BitConverter.ToInt32(totalb, 0);
+
+            for (int i = 0; i < total; i++)
+            {
+                byte[] IDb = new byte[4];
+                byte[] EXb = new byte[4];
+                byte[] Qb = new byte[4];
+
+                Array.Copy(data, (i * 12) + 4, IDb, 0, 4);
+                Array.Copy(data, (i * 12) + 8, EXb, 0, 4);
+                Array.Copy(data, (i * 12) + 12, Qb, 0, 4);
+
+                int ID = BitConverter.ToInt32(IDb, 0);
+                int EX = BitConverter.ToInt32(EXb, 0);
+                int Q = BitConverter.ToInt32(Qb, 0);
+
+                switch (ID)
+                {
+                    case 0:
+                        player.Inventory.Items[i] = new Potion(PotionType.Health, Q, EX);
+                        break;
+                    case 69:
+                        player.Inventory.Items[i] = new Gold(Q, EX);
+                        break;
+                }
+            }
+            return true;
+        }
     }
 
     class NetGame
@@ -357,7 +397,7 @@ namespace DX
         static int my_port;
         static string ip;
 
-        static Thread thrListen;              //поток для прослушки
+        static Task thrListen;              //поток для прослушки
         static bool listen = false;           //true чтобы прервать while в прослушке   
         public bool session_ON = false;       //Индикатор того запущена сессия с сервером или нет
         static bool available_port = false;   //Для обозначения того, что нашелся ли свободный порт для клиента
@@ -430,14 +470,14 @@ namespace DX
             if (available_port == false) { Console.WriteLine("UDP client not set"); return false; }
 
             //Если поток не инициализован
-            if (thrListen == null) thrListen = new Thread(new ThreadStart(Listener));
+            if (thrListen == null) thrListen = new Task(Listener);
 
             //Попытки запустить поток, если он прерывается в данный момент
             try
             {
                 listen = true;
-                thrListen = new Thread((Listener));
-                if (!thrListen.IsAlive) thrListen.Start();
+                thrListen = new Task(Listener);
+                if (thrListen.Status != TaskStatus.Running) thrListen.Start();
             }
             catch (Exception e)
             {
@@ -445,7 +485,7 @@ namespace DX
                 Console.WriteLine("[Connection check] Catch: " + e.Message);
                 Send(100, "", my_addr);
                 //thrListen.Abort();
-                thrListen.Join(1);
+                thrListen.Wait(1);
                 return false;
             }
 
@@ -458,15 +498,15 @@ namespace DX
                 Thread.Sleep(Sleep_Interval);
 
                 //Читаем полученное сообщение и освобождаем ресурсы
-                if (Permissions[255] == "ALIVE")
+                if (Permissions.ContainsKey(255) && Permissions[255] == "ALIVE")
                 {
                     listen = false;
-                    thrListen.Join(1);
+                    thrListen.Wait(1);
                     return true;
                 }
             }
             listen = false;
-            thrListen.Join(1);
+            thrListen.Wait(1);
             return false;
         }
 
@@ -480,12 +520,12 @@ namespace DX
             //Если поток прослушки выключен, запускаем его
             if (thrListen == null)
             {
-                thrListen = new Thread(new ThreadStart(Listener));
+                thrListen = new Task(Listener);
             }
             try
             {
                 listen = true;
-                if (!thrListen.IsAlive) thrListen.Start();
+                if (thrListen.Status != TaskStatus.Running) thrListen.Start();
             }
             catch (Exception e) { Console.WriteLine("[LogAndGame] Catch:" + e.Message); }
 
@@ -533,7 +573,7 @@ namespace DX
                     if (thrListen != null)
                     {
                         //thrListen.Abort();
-                        thrListen.Join(1);
+                        thrListen.Wait(1);
                     }
                     Console.WriteLine("[End Session]: Performed successfully");
                     return true;
@@ -546,7 +586,7 @@ namespace DX
             if (thrListen != null)
             {
                 //thrListen.Abort();
-                thrListen.Join(1);
+                thrListen.Wait(1);
             }
             Console.WriteLine("[End Session]: Client closed without server notification");
             return false;
@@ -617,7 +657,7 @@ namespace DX
                                 if (!session_ON) break;
                                 string data = Cons.GetData(msg);
                                 Console.WriteLine("Player END: " + data);
-                                Send(6, "OK" + data, game_addr);
+                                Send(6, msg, game_addr);
                                 Cons.DeletePlayer(ref Players, data);
                                 break;
 
@@ -632,6 +672,7 @@ namespace DX
                                 if (!session_ON) break;
                                 string data8 = Cons.GetData(msg);
                                 Cons.Parse_DropItems(ref Items, msg);
+                                Send(8, msg, game_addr);
                                 break;
 
                             //246 	SEND_MYXYD	| 1-4[x] 5-8[y] 9-12[rotation] 13[d] 14-17[hp] 17-end[char_name]
@@ -644,6 +685,13 @@ namespace DX
                             case 245:
                                 Console.WriteLine("245::" + Cons.GetData(msg));
                                 Permissions[245] = Cons.GetData(msg);
+                                break;
+
+                            //242     INV_UPDATE  | 1-4[q_all] 5-8[id] 9-12[ex] 13-16[q]...
+                            case 242:
+                                Console.WriteLine("242: " + Cons.GetData(msg));
+                                Send(9, Cons.GetData(msg), game_addr);
+                                Cons.UpdateInventory(Players[0], msg);
                                 break;
                         }
                     }
@@ -699,18 +747,21 @@ namespace DX
             byte callback_cmd;
             switch (command) { case 8: callback_cmd = 245; break; default: return false; }
 
+            Ping pinger = new Ping();
+            PingReply reply = pinger.Send(addr.Address);
+
             try
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    Console.WriteLine("SENDS:[" + i + "] To:" + addr + " Message:[" + Encoding.UTF8.GetString(msg) + "]");
+                    //Console.WriteLine("SENDS:[" + i + "] To:" + addr + " Message:[" + Encoding.UTF8.GetString(msg) + "]");
 
                     client_udp.Send(s_packet, s_packet.Length, addr);
-                    await Task.Delay(50);
+                    await Task.Delay((int)reply.RoundtripTime + 1);
 
-                    Console.WriteLine(" Received:[" + Permissions[callback_cmd] + "]");
+                    //Console.WriteLine(" Received:[" + Permissions[callback_cmd] + "]");
 
-                    if (Permissions[callback_cmd] == "OK" + Encoding.UTF8.GetString(msg)) { Permissions[callback_cmd] = null; return true; }
+                    if (Permissions[callback_cmd] == Encoding.UTF8.GetString(msg)) { Permissions[callback_cmd] = null; return true; }
                     else if (Permissions[callback_cmd] == "NO" + Encoding.UTF8.GetString(msg)) { Permissions[callback_cmd] = null; return false; }
                 }
                 Permissions[callback_cmd] = null;

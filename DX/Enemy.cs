@@ -8,6 +8,10 @@ namespace DX
 {
     public class Enemy
     {
+
+        bool Visible = false;
+        long lastPack = DateTime.Now.Ticks;
+
         int id = 0;
         protected string texture;
         float hp;
@@ -163,6 +167,32 @@ namespace DX
                 sY = value;
             }
         }
+
+        public bool Visible1
+        {
+            get
+            {
+                return Visible;
+            }
+
+            set
+            {
+                Visible = value;
+            }
+        }
+
+        public long LastPack
+        {
+            get
+            {
+                return lastPack;
+            }
+
+            set
+            {
+                lastPack = value;
+            }
+        }
     }
 }
 
@@ -206,7 +236,7 @@ class Ghost : DX.Enemy {
                 foreach (DX.Player player in Player)
                 {
                     float dist = (float)Math.Sqrt((player.X - base.X) * (player.X - base.X) + (player.Y - base.Y) * (player.Y - base.Y));
-                    if (aggro == null) if (dist < 5 && player.Alive)
+                    if (aggro == null||aggro.Alive) if (dist < 5 && player.Alive)
                         {
                             aggro = player;
                         }
