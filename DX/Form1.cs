@@ -141,8 +141,7 @@ namespace DX
             }
             else
             {
-                Gl.glRotatef(90f, 0, 0, 1);
-                Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["IdleR"]);
+                Draw2DTextCent(0, .60f, OnScreenYtoZ(player.Y), 1.5f, 1.5f, Textures["HeroDeath"]);
             }
             Gl.glPopMatrix();
 
@@ -158,9 +157,10 @@ namespace DX
                 if (PlayersList[i] == null) continue;
                 if (Math.Sqrt((player.X - PlayersList[i].X) * (player.X - PlayersList[i].X) + (player.Y - PlayersList[i].Y) * (player.Y - PlayersList[i].Y)) > 11f) continue;
                 PlayersList[i].CalcAnim();
-                if (PlayersList[i].Alive/*&&DateTime.Now.Ticks-player.LastPack<10000000000*/)
+                if (PlayersList[i].Hp>=0&&DateTime.Now.Ticks-player.LastPack<10000000000)
                 {
-                    //Console.WriteLine(PlayersList[i].Name + " " + PlayersList[i].X + " " + PlayersList[i].Y);
+
+                    Console.WriteLine(DateTime.Now.Ticks + "\t" + player.LastPack + "\t" + (DateTime.Now.Ticks - player.LastPack).ToString());
                     DrawStringCent(PlayersList[i].X - 2, PlayersList[i].X + 2, PlayersList[i].Y + 1.3f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, PlayersList[i].Name, 1, 1, 1, true);
                     Gl.glColor3f(0f, 0f, 0f);
                     Draw2DText(PlayersList[i].X - .45f, PlayersList[i].Y + 1.1f, -3, .9f, .15f, Textures["HPBAR"]);
@@ -171,9 +171,8 @@ namespace DX
                 }
                 else
                 {
-                    Gl.glRotatef(90f, 0, 0, 1);
                     DrawStringCent(PlayersList[i].X - 2, PlayersList[i].X + 2, PlayersList[i].Y + .9f, -3.5f, Glut.GLUT_BITMAP_HELVETICA_12, PlayersList[i].Name, 1, 1, 1, true);
-                    Draw2DTextCent(PlayersList[i].X, PlayersList[i].Y + 0.6f, OnScreenYtoZ(PlayersList[i].Y), 1.5f, 1.5f, Textures["IdleR"]);
+                    Draw2DTextCent(PlayersList[i].X, PlayersList[i].Y + 0.6f, OnScreenYtoZ(PlayersList[i].Y), 1.5f, 1.5f, Textures["HeroDeath"]);
                 }
             }
 
@@ -485,15 +484,6 @@ namespace DX
                 AllPlayers.Add(player);
                 PlayersList[0] = player;
 
-
-                /*EnemyList[0]= new Ghost(80, 70, RNG);
-                EnemyList[1]= new Ghost(82, 69, RNG);
-                EnemyList[2]= new Ghost(84, 68, RNG);
-                EnemyList[3]= new Ghost(85, 69, RNG);
-                EnemyList[4]= new Ghost(84, 68, RNG);
-                EnemyList[5]= new Ghost(79, 68, RNG);
-                EnemyList[6]= new Ghost(81, 69, RNG);*/
-
                 //DropList = new List<Item>();
 
                 //Инициализация NPC
@@ -507,25 +497,16 @@ namespace DX
                 string Name;
                 List<string> dialogs = ReadDialog(out Name, SR);
 
-                NPCList.Add(new DX.NPC(76, 63, Name, new string[] { "IdleD" }, new NPCClickFuncDel(NPCDelegates.AndreClickFunc), new NPCCalcAnimDel(NPCDelegates.AndreCalcAnim), new NPCExMarkDel(NPCDelegates.AndreExMark), dialogs));
+                NPCList.Add(new DX.NPC(76, 63, Name, new string[] { "AndreIdle" }, new NPCClickFuncDel(NPCDelegates.AndreClickFunc), new NPCCalcAnimDel(NPCDelegates.AndreCalcAnim), new NPCExMarkDel(NPCDelegates.AndreExMark), dialogs));
 
-                object[,] Goodies = new object[,] { };//
-                /*object[,] Goodies = new object[,] { { new Potion(PotionType.Health, 1),25 }, { new Potion(PotionType.Energy, 1), 50 }, { new Potion(PotionType.Energy, 1), 50 }
-                , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 }
-                , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 }
-                , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 }
-                , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } , { new Potion(PotionType.Energy, 1), 50 } };*/
+                object[,] Goodies = new object[,] { { new Potion(PotionType.Health, 1 , 0), 25 }, { new Potion(PotionType.Energy, 1, 0), 50 } };
+
                 dialogs = ReadDialog(out Name, SR);
-                NPCList.Add(new DX.NPC(78, 60, Name, new string[] { "IdleL" }, new NPCClickFuncDel(NPCDelegates.VendorClickFunc), new NPCCalcAnimDel(NPCDelegates.VendorCalcAnim), new NPCExMarkDel(NPCDelegates.VendorExMark), dialogs, Goodies));
+                NPCList.Add(new DX.NPC(78, 60, Name, new string[] { "VendorIdle" }, new NPCClickFuncDel(NPCDelegates.VendorClickFunc), new NPCCalcAnimDel(NPCDelegates.VendorCalcAnim), new NPCExMarkDel(NPCDelegates.VendorExMark), dialogs, Goodies));
 
                 Item.Drop = DropList;
 
-                /*player.Inventory.Add(new Potion(PotionType.Health, 20));
-                player.Inventory.Add(new Potion(PotionType.Health, 20));
-                player.Inventory.Add(new Potion(PotionType.Health, 20));
-                player.Inventory.Add(new Potion(PotionType.Health, 20));
-                player.Inventory.Add(new Potion(PotionType.Health, 20));
-                player.Inventory.Add(new Gold(int.MaxValue));*/
+
 
                 RenderTimer.Start();
                 LogicTimer.Start();
@@ -769,6 +750,7 @@ namespace DX
             Textures.Add("IdleU", LoadTexture("Tex//Idle//Up.png"));
             Textures.Add("IdleL", LoadTexture("Tex//Idle//Left.png"));
             Textures.Add("IdleR", LoadTexture("Tex//Idle//Right.png"));
+            Textures.Add("HeroDeath", LoadTexture("Tex//HeroDeath.png"));
             //uprun
             Textures.Add("HeroUP0", LoadTexture("Tex//UpRun//0.png"));
             Textures.Add("HeroUP1", LoadTexture("Tex//UpRun//1.png"));
@@ -816,6 +798,10 @@ namespace DX
             Textures.Add("HeroAtkD0", LoadTexture("Tex//Attack//down_0.png"));
             Textures.Add("HeroAtkD1", LoadTexture("Tex//Attack//down_1.png"));
 
+            //NPC
+
+            Textures.Add("AndreIdle", LoadTexture("Tex//NPCs//AndreIdle.png"));
+            Textures.Add("VendorIdle", LoadTexture("Tex//NPCs//VendorIdle.png"));
 
 
             LoginScreenRenderTimer.Start();
@@ -1201,7 +1187,7 @@ namespace DX
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (connect.session_ON) connect.End_Session();
+            if (NetGame.session_ON) connect.End_Session();
         }
 
         private void InterpolationTimer_Tick(object sender, EventArgs e)

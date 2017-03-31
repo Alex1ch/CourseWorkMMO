@@ -70,11 +70,12 @@ namespace DX
         {
             Task.Factory.StartNew(() =>
             {
-                items[Invid].WorkFunc(player);
-                if (items[Invid].QuantityLowCheck())
-                {
-                    items[Invid] = null;
-                }
+                NetGame.UseItem(0, Items[Invid].Id_exemplar);   
+                //items[Invid].WorkFunc(player);
+                //if (items[Invid].QuantityLowCheck())
+                //{
+                  //  items[Invid] = null;
+                //}
             });
         }
 

@@ -75,8 +75,9 @@ namespace DX
 
         public void Sell(Player player, int index) {
             Item clone = (Item)goods[index].Clone();
-            if(player.Inventory.Take(69, prices[index]))
-            player.Inventory.Add(clone);
+            NetGame.GroceryBuy(clone.Id);
+            //if (player.Inventory.Take(69, prices[index]))
+            //player.Inventory.Add(clone);
         }
 
         public void CheckQuests() {

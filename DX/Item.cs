@@ -368,9 +368,10 @@ namespace DX
                 {
                     if (player.Alive)
                     {
-                        player.Hp += 20;
-                        if (player.Hp > player.MaxHp + player.HpUp) player.Hp = player.MaxHp + player.HpUp;
-                        base.Quantity--;
+                    //Console.WriteLine("Used item ID = "+0+", ID_EX = "+Id_exemplar);
+                    //player.Hp += 20;
+                    //if (player.Hp > player.MaxHp + player.HpUp) player.Hp = player.MaxHp + player.HpUp;
+                    //base.Quantity--;
                     }
                 }
         }

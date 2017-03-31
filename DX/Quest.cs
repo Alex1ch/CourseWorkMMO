@@ -13,7 +13,8 @@ namespace DX
         bool finished = false;
         int finishState;
         string name;
-
+        int id;
+      
         bool popUp = false;
 
         List<Item> reward=new List<Item>();
@@ -37,8 +38,10 @@ namespace DX
             return false;
         }
 
-        public void StateUp() {
-            state++; PopUpFunc();
+        public void StateUp()
+        {
+            state++;
+            PopUpFunc();
         }
 
         protected void PopUpFunc() {
@@ -137,6 +140,19 @@ namespace DX
                 reward = value;
             }
         }
+
+        public int Id
+        {
+            get
+            {
+                return id;
+            }
+
+            set
+            {
+                id = value;
+            }
+        }
     }  
 
     class DarkSignsQuest : Quest {
@@ -146,6 +162,7 @@ namespace DX
 
         public DarkSignsQuest() {
             //base.Reward.Add(new Gold(100000));
+            base.Id = 0;
             base.FinishState = 4;
             base.Name = "Dark Signs";
             base.Desc = new string[base.FinishState];

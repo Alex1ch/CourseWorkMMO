@@ -194,6 +194,7 @@ namespace DX
                 player.SX = BitConverter.ToSingle(x, 0);
                 player.SY = BitConverter.ToSingle(y, 0);
                 player.Rotation = BitConverter.ToSingle(r, 0);
+                players[index].LastPack = DateTime.Now.Ticks;
 
                 player.LastPack = DateTime.Now.Ticks;
 
@@ -343,6 +344,16 @@ namespace DX
             }
         }
 
+        //244		DEL_DROP	| 1-4[id_ex]
+        public static bool DeleteItem(ref List<Item> Items, byte[] msg)
+        {
+            byte[] ID_EXb = new byte[4];
+            Array.Copy(msg, 1, ID_EXb, 0, 4);
+            int id_ex = BitConverter.ToInt32(ID_EXb, 0);
+            Items.RemoveAll(p => p.Id_exemplar == id_ex);
+            return true;
+        }
+
         //242     INV_UPDATE  | 1-4[q_all] 5-8[id] 9-12[ex] 13-16[q]...
         public static bool UpdateInventory(Player player, byte[] msg)
         {
@@ -352,6 +363,8 @@ namespace DX
             byte[] totalb = new byte[4];
             Array.Copy(data, 0, totalb, 0, 4);
             int total = BitConverter.ToInt32(totalb, 0);
+
+            for (int q = 0; q < player.Inventory.Size; q++) { player.Inventory.Items[q] = null; }
 
             for (int i = 0; i < total; i++)
             {
@@ -367,10 +380,17 @@ namespace DX
                 int EX = BitConverter.ToInt32(EXb, 0);
                 int Q = BitConverter.ToInt32(Qb, 0);
 
+                
                 switch (ID)
                 {
                     case 0:
                         player.Inventory.Items[i] = new Potion(PotionType.Health, Q, EX);
+                        break;
+                    case 1:
+                        player.Inventory.Items[i] = new Potion(PotionType.Energy, Q, EX);
+                        break;
+                    case 2:
+                        player.Inventory.Items[i] = new Potion(PotionType.Speed, Q, EX);
                         break;
                     case 69:
                         player.Inventory.Items[i] = new Gold(Q, EX);
@@ -399,7 +419,7 @@ namespace DX
 
         static Task thrListen;              //поток для прослушки
         static bool listen = false;           //true чтобы прервать while в прослушке   
-        public bool session_ON = false;       //Индикатор того запущена сессия с сервером или нет
+        static public bool session_ON = false;       //Индикатор того запущена сессия с сервером или нет
         static bool available_port = false;   //Для обозначения того, что нашелся ли свободный порт для клиента
         static bool IsExit = false; //Происходит отключение или нет
 
@@ -671,8 +691,7 @@ namespace DX
                             case 247:
                                 if (!session_ON) break;
                                 string data8 = Cons.GetData(msg);
-                                Cons.Parse_DropItems(ref Items, msg);
-                                Send(8, msg, game_addr);
+                                Cons.Parse_DropItems(ref Items, msg);      
                                 break;
 
                             //246 	SEND_MYXYD	| 1-4[x] 5-8[y] 9-12[rotation] 13[d] 14-17[hp] 17-end[char_name]
@@ -685,6 +704,11 @@ namespace DX
                             case 245:
                                 Console.WriteLine("245::" + Cons.GetData(msg));
                                 Permissions[245] = Cons.GetData(msg);
+                                break;
+                            //244     DEL_DROP | 1 - 4[id_ex]
+                            case 244:
+                                Console.WriteLine("244::" + Cons.GetData(msg));
+                                Cons.DeleteItem(ref Items, msg);
                                 break;
 
                             //242     INV_UPDATE  | 1-4[q_all] 5-8[id] 9-12[ex] 13-16[q]...
@@ -705,7 +729,7 @@ namespace DX
             }
         }
 
-        public void Send(byte command, byte[] msg, IPEndPoint addr)
+       static public void Send(byte command, byte[] msg, IPEndPoint addr)
         {
             byte[] s_packet = new byte[1 + msg.Length];
             for (int i = 1; i < msg.Length + 1; i++) s_packet[i] = msg[i - 1];
@@ -720,7 +744,7 @@ namespace DX
                 Console.WriteLine("Send(byte) catch: " + addr + ex.ToString() + "\n " + ex.Message);
             }
         }
-        public void Send(byte command, string message, IPEndPoint addr)
+       static public void Send(byte command, string message, IPEndPoint addr)
         {
             byte[] msg = Encoding.UTF8.GetBytes(message);
 
@@ -848,6 +872,56 @@ namespace DX
             Array.Copy(ex, 0, output, 4, 4);
 
             return await SendS(8, output, game_addr);
+        }
+
+        //10		ITEM_USED	| 1-4[id] 5-8[id_ex]
+        static public bool UseItem(int id, int id_EX)
+        {
+            //Если сессия не установлена, то отправить сообщение такого рода нельзя
+            if (!session_ON)
+            {
+                Console.WriteLine("Cant Use Item, try to start session before");
+                return false;
+            }
+            byte[] IDb = BitConverter.GetBytes(id);
+            byte[] ID_EXb = BitConverter.GetBytes(id_EX);
+            byte[] output = new byte[4 + 4];
+            Array.Copy(IDb, output, 4);
+            Array.Copy(ID_EXb, 0, output, 4, 4);
+            Send(10, output, game_addr);
+            return true;
+        }
+
+        //11		GROCERY_BUY | 1-4[id]
+        static public bool GroceryBuy(int ID)
+        {
+            //Если сессия не установлена, то отправить сообщение такого рода нельзя
+            if (!session_ON)
+            {
+                Console.WriteLine("Cant Buy, try to start session before");
+                return false;
+            }
+            byte[] IDb = BitConverter.GetBytes(ID);
+            byte[] output = new byte[4];
+            Array.Copy(IDb, output, 4);
+            Send(11, output, game_addr);
+            return true;
+        }
+
+        //12		TAKE_QUEST 	| 1-4[id]
+        static public bool TakeQuest(int ID)
+        {
+            //Если сессия не установлена, то отправить сообщение такого рода нельзя
+            if (!session_ON)
+            {
+                Console.WriteLine("Cant take Quest, try to start session before");
+                return false;
+            }
+            byte[] IDb = BitConverter.GetBytes(ID);
+            byte[] output = new byte[4];
+            Array.Copy(IDb, output, 4);
+            Send(12, output, game_addr);
+            return true;
         }
     }
 

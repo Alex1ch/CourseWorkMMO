@@ -89,6 +89,7 @@ namespace DX
 
         public Player(float pX, float pY,string _name)
         {
+            lastPack = DateTime.Now.Ticks;
             name = _name;
             quests.Add(new DarkSignsQuest());
             x = pX; y = pY;
@@ -376,7 +377,7 @@ namespace DX
                     
                 }
             }
-            if (!W && !A && !S && !D) direction = 0;
+            if ((!W && !A && !S && !D)|| !W && A && !S && D|| W && !A && S && !D) direction = 0;
         }
 
 
